@@ -10,8 +10,8 @@ namespace LLS.Common.Enums
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum MainType
     {
-        CONTENT ,
-        QUESTION ,
+        CONTENT,
+        QUESTION,
         LAYOUT 
     }
 }
