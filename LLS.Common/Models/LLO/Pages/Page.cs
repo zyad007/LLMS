@@ -13,7 +13,7 @@ namespace LLS.Common.Models.LLO.Pages
         public int index { get; set; }
         public string title { get; set; }
         public config config { get; set; }
-        public VRL VRl { get; set; }
+        public VRL vrl { get; set; }
         public List<Block> Column1 { get; set; }
         public List<Block> Column2 { get; set; }
         public List<Block> Column3 { get; set; }

@@ -16,6 +16,6 @@ namespace LLS.Common.Models.LLO.Pages.Blocks.Content
         public List<Statements.StatementContent> statements { get; set; }
         public string fileUrl { get; set; }
         public int width { get; set; }
-        public int hieght { get; set; }   
+        public int height { get; set; }
     }
 }

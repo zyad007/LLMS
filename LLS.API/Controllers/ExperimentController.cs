@@ -48,7 +48,14 @@ namespace LLS.API.Controllers
         }
 
         [HttpPost("CreateLLO")]
-        public async Task<IActionResult> CreateExp(Guid idd, LLO llo)
+        public async Task<IActionResult> CreateLLO(Guid idd, LLO llo)
+        {
+            var res = await _experimentService.CreateLLO(idd, llo);
+            return CheckResult(res);
+        }
+
+        [HttpPut("{idd}/EditLLO")]
+        public async Task<IActionResult> EditLLO(Guid idd, LLO llo)
         {
             var res = await _experimentService.CreateLLO(idd, llo);
             return CheckResult(res);
