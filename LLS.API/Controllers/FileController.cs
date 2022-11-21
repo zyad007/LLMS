@@ -28,7 +28,12 @@ namespace LLS.API.Controllers
                 });
             }
 
-            string baseUrl = _enviroment.WebRootPath + "/";
+            if (!Directory.Exists(_enviroment.WebRootPath + "/Images/"))
+            {
+                Directory.CreateDirectory(_enviroment.WebRootPath + "/Images/");
+            }
+
+            string baseUrl = _enviroment.WebRootPath + "/Images/";
 
             string fileName = objFile.FileName;
 
@@ -40,7 +45,7 @@ namespace LLS.API.Controllers
                 objFile.CopyTo(fileStream);
             }
 
-            var imageUrl = "https://lls-api.herokuapp.com/" + newFileName;
+            var imageUrl = "https://lls-api.herokuapp.com/Images/" + newFileName;
 
             return Ok(new
             {
