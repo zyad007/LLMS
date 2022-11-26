@@ -95,7 +95,7 @@ namespace LLS.BLL.Services
             {
                 return new Result()
                 {
-                    Status = false,
+                    Status = true,
                     Message = "There is no Courses"
                 };
             }
@@ -327,20 +327,20 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var resource_Exps = new List<Resource_Exp>();
-            foreach (var resourceId in resourcesId)
-            {
-                var resource_exp = new Resource_Exp()
-                {
-                    Exp_Course = result.Entity,
-                    Exp_CourseId = result.Entity.Id,
-                    ResourceId = resourceId,
-                    Resource = _context.Resources.Find(resourceId)
-                };
-                resource_Exps.Add(resource_exp);
-            }
+            //var resource_Exps = new List<Resource_Exp>();
+            //foreach (var resourceId in resourcesId)
+            //{
+            //    var resource_exp = new Resource_Exp()
+            //    {
+            //        Exp_Course = result.Entity,
+            //        Exp_CourseId = result.Entity.Id,
+            //        ResourceId = resourceId,
+            //        Resource = _context.Resources.Find(resourceId)
+            //    };
+            //    resource_Exps.Add(resource_exp);
+            //}
 
-            await _context.Resource_Exps.AddRangeAsync(resource_Exps);
+            //await _context.Resource_Exps.AddRangeAsync(resource_Exps);
 
             var students = await _context.User_Courses.Where(x => x.CourseId == course.Id && x.Role == "student")
                                 .Select(x => x.User).ToListAsync();
@@ -397,7 +397,7 @@ namespace LLS.BLL.Services
                         LLO_MA = JsonConvert.DeserializeObject<LLO>(x.Experiment.LLO_MA),
                         StartDate = x.StartDate,
                         EndDate = x.EndDate,
-                        Resources = x.Resource_Exps.Select(x => x.Resource).ToList()
+                        //Resources = x.Resource_Exps.Select(x => x.Resource).ToList()
                     })
                     .ToListAsync();
            

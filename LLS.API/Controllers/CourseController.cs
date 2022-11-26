@@ -1,5 +1,6 @@
 ﻿using LLS.BLL.IServices;
 using LLS.Common.Dto;
+using LLS.Common.Transfere_Layer_Object;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -48,6 +49,16 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
+        [HttpPut("{idd}/Update")]
+        public async Task<IActionResult> UpdateCourseByName(string idd, CourseDto courseDto)
+        {
+            courseDto.Idd = idd;
+
+            var result = await _courseService.UpdateCourse(courseDto);
+
+            return CheckResult(result);
+        }
+
         [HttpGet("{idd}/Experiments")]
         public async Task<IActionResult> GetExpAssignedToCourse(string idd)
         {
@@ -88,10 +99,18 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
-        [HttpPost("{idd}/Assign-Student")]
-        public async Task<IActionResult> AssignStudentToCourse(string email, string idd)
+        [HttpPost("{idd}/Assign-Students")]
+        public async Task<IActionResult> AssignStudentToCourse(List<string> emails, string idd)
         {
-            var result = await _courseService.AssignUserToCourse(email, idd, "student");
+            foreach (var email in emails)
+            {
+                await _courseService.AssignUserToCourse(email, idd, "student");
+            }
+            var result = new Result()
+            {
+                Status = true,
+                Message = "Students Assigned"
+            };
 
             return CheckResult(result);
         }
