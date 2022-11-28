@@ -15,12 +15,10 @@ namespace LLS.Common.Dto
         public string AuthorId { get; set; }
         public string AuthorName { get; set; }
         public LLO LLO { get; set; }
-        public LLO LLO_MA { get; set; }
         public string Description { get; set; }
         public string CourseName { get; set; }
-        public string CourseIdd { get; set; }
+        public Guid CourseIdd { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public List<Resource> Resources { get; set; }
     }
 }

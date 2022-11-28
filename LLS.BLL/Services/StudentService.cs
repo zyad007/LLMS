@@ -51,8 +51,8 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var Exp_Courses = await _context.Users.Where(n => n.Id == user.Id)
-                                        .Select(x => x.Student_ExpCourses.Select(x => x.Exp_Course).ToList())
+            var Exp_Courses = await _context.User_Courses.Where(n => n.UserId == user.Id)
+                                        .Select(x => x.StudentCourse_ExpCourses.Select(x => x.Exp_Course).ToList())
                                         .FirstOrDefaultAsync();
 
 
@@ -68,7 +68,6 @@ namespace LLS.BLL.Services
                     AuthorName = exp.AuthorName,
                     CourseName = course.Name,
                     CourseIdd = course.Idd,
-                    LLO = JsonConvert.DeserializeObject<LLO>(exp.LLO),
                     StartDate = exp_course.StartDate,
                     EndDate = exp_course.EndDate
                 };
@@ -121,152 +120,154 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> GetStudentResult(string email, string courseIdd,Guid expIdd)
-        {
-            var user = await _unitOfWork.Users.GetByEmail(email);
-            if (user == null)
-            {
-                return new Result()
-                {
-                    Message = "User doesn't exist",
-                    Status = false
-                };
-            }
+        //public async Task<Result> GetStudentResult(string email, Guid courseIdd,Guid expIdd)
+        //{
+        //    var user = await _unitOfWork.Users.GetByEmail(email);
+        //    if (user == null)
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "User doesn't exist",
+        //            Status = false
+        //        };
+        //    }
 
-            if (user.Role.ToLower() != "student")
-            {
-                return new Result()
-                {
-                    Message = "User doesn't have Student Role",
-                    Status = false
-                };
-            }
+        //    if (user.Role.ToLower() != "student")
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "User doesn't have Student Role",
+        //            Status = false
+        //        };
+        //    }
 
-            var course = await _unitOfWork.Courses.GetByIdd(courseIdd);
-            if (course == null)
-                return new Result()
-                {
-                    Message = "there is no course with this IDD",
-                    Status = false
-                };
+        //    var course = await _unitOfWork.Courses.GetByIdd(courseIdd);
+        //    if (course == null)
+        //        return new Result()
+        //        {
+        //            Message = "there is no course with this IDD",
+        //            Status = false
+        //        };
 
-            var exp = await _unitOfWork.Experiments.GetByIdd(expIdd);
-            if (exp == null)
-                return new Result()
-                {
-                    Message = "there is no Experiment with this IDD",
-                    Status = false
-                };
+        //    var exp = await _unitOfWork.Experiments.GetByIdd(expIdd);
+        //    if (exp == null)
+        //        return new Result()
+        //        {
+        //            Message = "there is no Experiment with this IDD",
+        //            Status = false
+        //        };
 
-            var expCourse = await _context.Exp_Courses
-                .FirstOrDefaultAsync(x => x.ExperimentId == exp.Id);
+        //    var expCourse = await _context.Exp_Courses
+        //        .FirstOrDefaultAsync(x => x.ExperimentId == exp.Id);
 
-            var stu_trials = await _context.Student_ExpCourses.Where(x => x.StudentId == user.Id
-            && x.Exp_CourseId == expCourse.Id)
-                .Select(x => x.Trials).FirstOrDefaultAsync();
+        //    var stu_trials = await _context.Student_ExpCourses.Where(x => x.StudentId == user.Id
+        //    && x.Exp_CourseId == expCourse.Id)
+        //        .Select(x => x.Trials).FirstOrDefaultAsync();
 
-            var trialsDto = new List<TrialDto>();
-            foreach(var stu_trial in stu_trials)
-            {
-                var trialDto = _mapper.Map<TrialDto>(stu_trial);
-                trialDto.LRO_SA = JsonConvert.DeserializeObject<LLO>(stu_trial.LRO_SA);
-                trialDto.LRO = JsonConvert.DeserializeObject<LLO>(stu_trial.LRO);
-                trialsDto.Add(trialDto);
-            }
+        //    var trialsDto = new List<TrialDto>();
+        //    foreach(var stu_trial in stu_trials)
+        //    {
+        //        var trialDto = _mapper.Map<TrialDto>(stu_trial);
+        //        trialDto.LRO_SA = JsonConvert.DeserializeObject<LLO>(stu_trial.LRO_SA);
+        //        trialDto.LRO = JsonConvert.DeserializeObject<LLO>(stu_trial.LRO);
+        //        trialsDto.Add(trialDto);
+        //    }
 
-            return new Result()
-            {
-                Data = trialsDto,
-                Status = true
-            };
+        //    return new Result()
+        //    {
+        //        Data = trialsDto,
+        //        Status = true
+        //    };
 
-        }
+        //}
 
-        public async Task<Result> SubmitExp(StudentSubmit submit)
-        {
-            var user = await _unitOfWork.Users.GetByEmail(submit.email);
-            if (user == null)
-            {
-                return new Result()
-                {
-                    Message = "User doesn't exist",
-                    Status = false
-                };
-            }
+        //public async Task<Result> SubmitExp(StudentSubmit submit)
+        //{
+        //    var user = await _unitOfWork.Users.GetByEmail(submit.email);
+        //    if (user == null)
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "User doesn't exist",
+        //            Status = false
+        //        };
+        //    }
 
-            if (user.Role.ToLower() != "student")
-            {
-                return new Result()
-                {
-                    Message = "User doesn't have Student Role",
-                    Status = false
-                };
-            }
+        //    if (user.Role.ToLower() != "student")
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "User doesn't have Student Role",
+        //            Status = false
+        //        };
+        //    }
 
-            var course = await _unitOfWork.Courses.GetByIdd(submit.courseIdd);
-            if (course == null)
-                return new Result()
-                {
-                    Message = "there is no course with this IDD",
-                    Status = false
-                };
+        //    var course = await _unitOfWork.Courses.GetByIdd(submit.courseIdd);
+        //    if (course == null)
+        //        return new Result()
+        //        {
+        //            Message = "there is no course with this IDD",
+        //            Status = false
+        //        };
 
-            var exp = await _unitOfWork.Experiments.GetByIdd(submit.expIdd);
-            if (exp == null)
-                return new Result()
-                {
-                    Message = "there is no Experiment with this IDD",
-                    Status = false
-                };
+        //    var exp = await _unitOfWork.Experiments.GetByIdd(submit.expIdd);
+        //    if (exp == null)
+        //        return new Result()
+        //        {
+        //            Message = "there is no Experiment with this IDD",
+        //            Status = false
+        //        };
 
-            var expCourse = await _context.Exp_Courses
-                .FirstOrDefaultAsync(x => x.ExperimentId == exp.Id);
+        //    var expCourse = await _context.Exp_Courses
+        //        .FirstOrDefaultAsync(x => x.ExperimentId == exp.Id);
             
-            var stu_trials = await _context.Student_ExpCourses.Where(x => x.StudentId == user.Id
-            && x.Exp_CourseId == expCourse.Id)
-                .Select(x => x.Trials).FirstOrDefaultAsync();
+        //    var stu_trials = await _context.Student_ExpCourses.Where(x => x.StudentId == user.Id
+        //    && x.Exp_CourseId == expCourse.Id)
+        //        .Select(x => x.Trials).FirstOrDefaultAsync();
 
-            var stu_expCourse = await _context.Student_ExpCourses
-                .FirstOrDefaultAsync(x => x.StudentId == user.Id);
+        //    var stu_expCourse = await _context.Student_ExpCourses
+        //        .FirstOrDefaultAsync(x => x.StudentId == user.Id);
 
-            if (stu_trials.Count < expCourse.NumbersOfTrials)
-            {
+        //    if (stu_trials.Count < expCourse.NumbersOfTrials)
+        //    {
 
-                var studentSubmint = new Student_Trial()
-                {
-                    TotalTimeInMin = submit.TotalTimeInMin,
-                    LRO_SA = JsonConvert.SerializeObject(submit.LRO_SA, Formatting.None,
-                                        new JsonSerializerSettings
-                                        {
-                                            NullValueHandling = NullValueHandling.Ignore
-                                        }),
-                    Student_ExpCourseId = stu_expCourse.Id,
-                    Student_ExpCourse = stu_expCourse
-                };
+        //        var studentSubmint = new Student_Trial()
+        //        {
+        //            TotalTimeInMin = submit.TotalTimeInMin,
+        //            LRO_SA = JsonConvert.SerializeObject(submit.LRO_SA, Formatting.None,
+        //                                new JsonSerializerSettings
+        //                                {
+        //                                    NullValueHandling = NullValueHandling.Ignore
+        //                                }),
+        //            Student_ExpCourseId = stu_expCourse.Id,
+        //            Student_ExpCourse = stu_expCourse
+        //        };
 
                 
 
-                //AutoGrade(studentSubmint, exp, stu_expCourse.NumberOfTials);
-                var res = await _context.Trials.AddAsync(studentSubmint);
-                stu_expCourse.NumberOfTials++;
+        //        //AutoGrade(studentSubmint, exp, stu_expCourse.NumberOfTials);
+        //        var res = await _context.Trials.AddAsync(studentSubmint);
+        //        stu_expCourse.NumberOfTials++;
 
-                await _unitOfWork.SaveAsync();
+        //        await _unitOfWork.SaveAsync();
 
-                return new Result()
-                {
-                    Message = "Submited Successfully",
-                    Status = true
-                };
-            }
+        //        return new Result()
+        //        {
+        //            Message = "Submited Successfully",
+        //            Status = true
+        //        };
+        //    }
 
-            return new Result()
-            {
-                Message = "There is no other trial for this Exp",
-                Status = false
-            };
+        //    return new Result()
+        //    {
+        //        Message = "There is no other trial for this Exp",
+        //        Status = false
+        //    };
 
 
-        }
+        //}
+
+
         //private void AutoGrade(Student_Trial studentSubmint, Experiment exp,int trialsCount)
         //{
         //    var LRO_SA = JsonConvert.DeserializeObject<LLO>(studentSubmint.LRO_SA);
@@ -353,150 +354,150 @@ namespace LLS.BLL.Services
             //studentSubmint.TrialNumber++;
         //}
 
-        public async Task<Result> ReserveTimeSlot(string email,Guid expIdd, string courseIdd,int timeSlot)
-        {
-            var user = await _unitOfWork.Users.GetByEmail(email);
-            if (user == null)
-            {
-                return new Result()
-                {
-                    Message = "User doesn't exist",
-                    Status = false
-                };
-            }
+        //public async Task<Result> ReserveTimeSlot(string email,Guid expIdd, string courseIdd,int timeSlot)
+        //{
+        //    var user = await _unitOfWork.Users.GetByEmail(email);
+        //    if (user == null)
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "User doesn't exist",
+        //            Status = false
+        //        };
+        //    }
 
-            if (user.Role.ToLower() != "student")
-            {
-                return new Result()
-                {
-                    Message = "User doesn't have Student Role",
-                    Status = false
-                };
-            }
+        //    if (user.Role.ToLower() != "student")
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "User doesn't have Student Role",
+        //            Status = false
+        //        };
+        //    }
 
-            var course = await _unitOfWork.Courses.GetByIdd(courseIdd);
-            if (course == null)
-                return new Result()
-                {
-                    Message = "there is no course with this IDD",
-                    Status = false
-                };
+        //    var course = await _unitOfWork.Courses.GetByIdd(courseIdd);
+        //    if (course == null)
+        //        return new Result()
+        //        {
+        //            Message = "there is no course with this IDD",
+        //            Status = false
+        //        };
 
-            var exp = await _unitOfWork.Experiments.GetByIdd(expIdd);
-            if (exp == null)
-                return new Result()
-                {
-                    Message = "there is no Experiment with this IDD",
-                    Status = false
-                };
-
-
-            var listTimeSlot = await _context.StudentSessions.Where(x => x.TimeSlot == timeSlot).ToListAsync();
-            var listMachine = await _context.Machines.ToListAsync();
-
-            if (listTimeSlot.Count == listMachine.Count)
-            {
-                return new Result()
-                {
-                    Message = "This time Slot is full",
-                    Status = false
-                };
-            }
-
-            var exp_course = await _context.Exp_Courses.FirstOrDefaultAsync(x => x.CourseId == course.Id && x.ExperimentId == exp.Id);
-            var checkIfPreUsed = await _context.StudentSessions.FirstOrDefaultAsync(x => x.ExpCourseId == exp_course.Id && x.StudentId == user.Id);
-
-            if(checkIfPreUsed != null)
-            {
-                return new Result()
-                {
-                    Message = "You already resrved for this experiment",
-                    Status = false
-                };
-            }
+        //    var exp = await _unitOfWork.Experiments.GetByIdd(expIdd);
+        //    if (exp == null)
+        //        return new Result()
+        //        {
+        //            Message = "there is no Experiment with this IDD",
+        //            Status = false
+        //        };
 
 
-            var session = new StudentSession()
-            {
-                StudentId = user.Id,
-                Student = user,
+        //    var listTimeSlot = await _context.StudentSessions.Where(x => x.TimeSlot == timeSlot).ToListAsync();
+        //    var listMachine = await _context.Machines.ToListAsync();
 
-                ExpCourseId = exp_course.Id,
-                ExpCourse = exp_course,
+        //    if (listTimeSlot.Count == listMachine.Count)
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "This time Slot is full",
+        //            Status = false
+        //        };
+        //    }
 
-                TimeSlot = timeSlot
-            };
+        //    var exp_course = await _context.Exp_Courses.FirstOrDefaultAsync(x => x.CourseId == course.Id && x.ExperimentId == exp.Id);
+        //    var checkIfPreUsed = await _context.StudentSessions.FirstOrDefaultAsync(x => x.ExpCourseId == exp_course.Id && x.StudentId == user.Id);
 
-            var res = await _context.StudentSessions.AddAsync(session);
-            await _context.SaveChangesAsync();
+        //    if(checkIfPreUsed != null)
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "You already resrved for this experiment",
+        //            Status = false
+        //        };
+        //    }
 
-            var studentsExp = new List<StudentExp>();
-            var students = await _context.StudentSessions.Where(x => x.TimeSlot == timeSlot)
-                                                         .Select(x => x.Student).ToListAsync();
-            var studentResources = await _context.StudentSessions.Where(x => x.TimeSlot == timeSlot)
-                                                                 .Select(x=>x.ExpCourse.Resource_Exps.Select(x=>x.Resource).ToList()).ToListAsync();
 
-            var machinesExp = new List<MachineExp>();
-            var machines = await _context.Machines.ToListAsync();
-            var machineResurces = await _context.Machines.Select(x => x.resource_machines.Select(x => x.Resource).ToList()).ToListAsync();
+        //    var session = new StudentSession()
+        //    {
+        //        StudentId = user.Id,
+        //        Student = user,
 
-            var resources = await _context.Resources.ToListAsync();
+        //        ExpCourseId = exp_course.Id,
+        //        ExpCourse = exp_course,
 
-            // Pre-Algrothim
-            for (int i=0; i< students.Count; i++)
-            {
-                var listOfIntRes = new List<int>();
-                for(int j=0; j< studentResources[i].Count ; j++)
-                {
-                    var id = studentResources[i][j].Id;
-                    listOfIntRes.Add(resources.FindIndex(x => x.Id == id)+1);
-                }
+        //        TimeSlot = timeSlot
+        //    };
 
-                var studentExp = new StudentExp(i+1, listOfIntRes);
-                studentsExp.Add(studentExp);
-            }
+        //    var res = await _context.StudentSessions.AddAsync(session);
+        //    await _context.SaveChangesAsync();
 
-            for(int i=0; i< machines.Count; i++)
-            {
-                var listOfIntRes = new List<int>();
-                for (int j = 0; j < machineResurces[i].Count; j++)
-                {
-                    var id = machineResurces[i][j].Id;
-                    listOfIntRes.Add(resources.FindIndex(x => x.Id == id) + 1);
-                }
+        //    var studentsExp = new List<StudentExp>();
+        //    var students = await _context.StudentSessions.Where(x => x.TimeSlot == timeSlot)
+        //                                                 .Select(x => x.Student).ToListAsync();
+        //    var studentResources = await _context.StudentSessions.Where(x => x.TimeSlot == timeSlot)
+        //                                                         .Select(x=>x.ExpCourse.Resource_Exps.Select(x=>x.Resource).ToList()).ToListAsync();
 
-                var machineExp = new MachineExp(i + 1, listOfIntRes);
-                machinesExp.Add(machineExp);
-            }
+        //    var machinesExp = new List<MachineExp>();
+        //    var machines = await _context.Machines.ToListAsync();
+        //    var machineResurces = await _context.Machines.Select(x => x.resource_machines.Select(x => x.Resource).ToList()).ToListAsync();
 
-            // Algorithm Code:
-            MatchGame game = new MatchGame(studentsExp, machinesExp);
-            var resMachines = game.GetFinalResult();
+        //    var resources = await _context.Resources.ToListAsync();
 
-            foreach (var ress in resMachines)
-            {
-                try
-                {
-                    var studentSession = await _context.StudentSessions.FirstOrDefaultAsync(x => x.StudentId == students[ress.Partner.Id-1].Id && x.TimeSlot == timeSlot);
-                    var id = machines[ress.Id-1].Id;
-                    studentSession.MachineId = id;
-                    studentSession.Machine = await _context.Machines.FindAsync(id);
-                }
-                catch(Exception e)
-                {
+        //    // Pre-Algrothim
+        //    for (int i=0; i< students.Count; i++)
+        //    {
+        //        var listOfIntRes = new List<int>();
+        //        for(int j=0; j< studentResources[i].Count ; j++)
+        //        {
+        //            var id = studentResources[i][j].Id;
+        //            listOfIntRes.Add(resources.FindIndex(x => x.Id == id)+1);
+        //        }
 
-                }
-            }
+        //        var studentExp = new StudentExp(i+1, listOfIntRes);
+        //        studentsExp.Add(studentExp);
+        //    }
+
+        //    for(int i=0; i< machines.Count; i++)
+        //    {
+        //        var listOfIntRes = new List<int>();
+        //        for (int j = 0; j < machineResurces[i].Count; j++)
+        //        {
+        //            var id = machineResurces[i][j].Id;
+        //            listOfIntRes.Add(resources.FindIndex(x => x.Id == id) + 1);
+        //        }
+
+        //        var machineExp = new MachineExp(i + 1, listOfIntRes);
+        //        machinesExp.Add(machineExp);
+        //    }
+
+        //    // Algorithm Code:
+        //    MatchGame game = new MatchGame(studentsExp, machinesExp);
+        //    var resMachines = game.GetFinalResult();
+
+        //    foreach (var ress in resMachines)
+        //    {
+        //        try
+        //        {
+        //            var studentSession = await _context.StudentSessions.FirstOrDefaultAsync(x => x.StudentId == students[ress.Partner.Id-1].Id && x.TimeSlot == timeSlot);
+        //            var id = machines[ress.Id-1].Id;
+        //            studentSession.MachineId = id;
+        //            studentSession.Machine = await _context.Machines.FindAsync(id);
+        //        }
+        //        catch(Exception e)
+        //        {
+
+        //        }
+        //    }
             
 
-            await _context.SaveChangesAsync();
+        //    await _context.SaveChangesAsync();
 
-            return new Result()
-            {
-                Data = $"you have been successfully resrved Time Slot:{timeSlot}",
-                Status = true
-            };
+        //    return new Result()
+        //    {
+        //        Data = $"you have been successfully resrved Time Slot:{timeSlot}",
+        //        Status = true
+        //    };
 
-        }
+        //}
     }
 }

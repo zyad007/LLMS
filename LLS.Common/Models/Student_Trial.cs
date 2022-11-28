@@ -14,7 +14,7 @@ namespace LLS.Common.Models
         public Guid Student_ExpCourseId { get; set; }
 
         [ForeignKey(nameof(Student_ExpCourseId))]
-        public Student_ExpCourse Student_ExpCourse { get; set; }
+        public StudentCourse_ExpCourse StudentCourse_ExpCourse { get; set; }
 
         public int TrialNumber {get;set;}
 

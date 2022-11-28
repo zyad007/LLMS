@@ -45,7 +45,6 @@ namespace LLS.BLL.Services
             var course = _iMapper.Map<Course>(courseDto);
 
             var res = await _unitOfWork.Courses.Create(course);
-
             if(res == false)
             {
                 return new Result()
@@ -65,7 +64,7 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> DeleteCourse(string idd)
+        public async Task<Result> DeleteCourse(Guid idd)
         {
             var exist = await _unitOfWork.Courses.GetByIdd(idd);
             if (exist == null)
@@ -114,7 +113,7 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> GetCourse(string idd)
+        public async Task<Result> GetCourse(Guid idd)
         {
             var exist = await _unitOfWork.Courses.GetByIdd(idd);
             if (exist == null)
@@ -160,7 +159,7 @@ namespace LLS.BLL.Services
 
         //
 
-        public async Task<Result> AssignUserToCourse(string email, string idd,string role)
+        public async Task<Result> AssignUserToCourse(string email, Guid idd,string role)
         {
             var course = await _unitOfWork.Courses.GetByIdd(idd);
             if (course == null)
@@ -219,15 +218,15 @@ namespace LLS.BLL.Services
 
                 foreach (var exp_course in exp_courses)
                 {
-                    var student_expCourse = new Student_ExpCourse()
+                    var studentCourse_expCourse = new StudentCourse_ExpCourse()
                     {
-                        StudentId = user.Id,
-                        User = user,
+                        Student_CourseId = user_course.Id,
+                        Student_Course = user_course,
                         Exp_CourseId = exp_course.Id,
                         Exp_Course = exp_course
                     };
 
-                    await _context.Student_ExpCourses.AddAsync(student_expCourse);
+                    await _context.StudentCourse_ExpCourses.AddAsync(studentCourse_expCourse);
                 }
 
 
@@ -243,7 +242,7 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> GetUsersAssignedToCourse(string idd, string role)
+        public async Task<Result> GetUsersAssignedToCourse(Guid idd, string role)
         {
             var course = await _unitOfWork.Courses.GetByIdd(idd);
             if (course == null)
@@ -275,7 +274,7 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> AssignExpToCourse(Guid expIdd, string courseIdd, DateTime startDate, DateTime endDate,int trials, List<Guid> resourcesId)
+        public async Task<Result> AssignExpToCourse(Guid expIdd, Guid courseIdd, DateTime startDate, DateTime endDate,int trials)
         {
             var course = await _unitOfWork.Courses.GetByIdd(courseIdd);
             if (course == null)
@@ -327,35 +326,22 @@ namespace LLS.BLL.Services
                 };
             }
 
-            //var resource_Exps = new List<Resource_Exp>();
-            //foreach (var resourceId in resourcesId)
-            //{
-            //    var resource_exp = new Resource_Exp()
-            //    {
-            //        Exp_Course = result.Entity,
-            //        Exp_CourseId = result.Entity.Id,
-            //        ResourceId = resourceId,
-            //        Resource = _context.Resources.Find(resourceId)
-            //    };
-            //    resource_Exps.Add(resource_exp);
-            //}
-
-            //await _context.Resource_Exps.AddRangeAsync(resource_Exps);
-
             var students = await _context.User_Courses.Where(x => x.CourseId == course.Id && x.Role == "student")
                                 .Select(x => x.User).ToListAsync();
 
             foreach (var student in students)
             {
-                var student_expCourse = new Student_ExpCourse()
+                var studentCourse = course.User_Courses.FirstOrDefault(x => x.UserId == student.Id);
+
+                var student_expCourse = new StudentCourse_ExpCourse()
                 {
-                    StudentId = student.Id,
+                    Student_CourseId = studentCourse.Id,
+                    Student_Course = studentCourse,
                     Exp_Course = result.Entity,
-                    Exp_CourseId = result.Entity.Id,
-                    User = student
+                    Exp_CourseId = result.Entity.Id
                 };
 
-                await _context.Student_ExpCourses.AddAsync(student_expCourse);
+                await _context.StudentCourse_ExpCourses.AddAsync(student_expCourse);
             }
 
 
@@ -369,7 +355,7 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> GetExpAssignedToCourse(string idd)
+        public async Task<Result> GetExpAssignedToCourse(Guid idd)
         {
             var course = await _unitOfWork.Courses.GetByIdd(idd);
             if (course == null)
@@ -380,7 +366,6 @@ namespace LLS.BLL.Services
                     Message = "Course doesn't exists"
                 };
             }
-            var exp_courses = await _context.Exp_Courses.Where(x => x.CourseId == course.Id).ToListAsync();
 
             var expListDto = await _context.Exp_Courses
                     .Where(x => x.CourseId == course.Id)
@@ -390,14 +375,9 @@ namespace LLS.BLL.Services
                         Idd = x.Experiment.Idd,
                         AuthorName = x.Experiment.AuthorName,
                         AuthorId = x.Experiment.AuthorId,
-                        CourseName = course.Name,
-                        CourseIdd = course.Idd,
                         Description = x.Experiment.Description,
-                        LLO = JsonConvert.DeserializeObject<LLO>(x.Experiment.LLO),
-                        LLO_MA = JsonConvert.DeserializeObject<LLO>(x.Experiment.LLO_MA),
                         StartDate = x.StartDate,
                         EndDate = x.EndDate,
-                        //Resources = x.Resource_Exps.Select(x => x.Resource).ToList()
                     })
                     .ToListAsync();
            
@@ -407,7 +387,7 @@ namespace LLS.BLL.Services
             {
                 return new Result()
                 {
-                    Status = false,
+                    Status = true,
                     Message = "There is no Expirment in this Course"
                 };
             }

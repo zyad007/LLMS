@@ -28,10 +28,6 @@ namespace LLS.Common.Models
 
 
         //Info for Specifiec Student in This Exp
-        public List<Student_ExpCourse> Student_ExpCourses { get; set; }
-
-        //Resources needed for the Exp
-        public List<Resource_Exp> Resource_Exps { get; set; }
-
+        public List<StudentCourse_ExpCourse> StudentCourse_ExpCourses { get; set; }
     }
 }

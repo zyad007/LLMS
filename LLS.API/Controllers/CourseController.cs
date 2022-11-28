@@ -20,15 +20,17 @@ namespace LLS.API.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> CreateCourse(CourseDto courseDto)
         {
+            courseDto.Idd = Guid.NewGuid();
+
             var result = await _courseService.CreateCourse(courseDto);
 
             return CheckResult(result);
         }
 
         [HttpDelete("Delete")]
-        public async Task<IActionResult> DeleteCourse(string courseName)
+        public async Task<IActionResult> DeleteCourse(Guid idd)
         {
-            var result = await _courseService.DeleteCourse(courseName);
+            var result = await _courseService.DeleteCourse(idd);
 
             return CheckResult(result);
         }
@@ -42,7 +44,7 @@ namespace LLS.API.Controllers
         }
 
         [HttpGet("{idd}")]
-        public async Task<IActionResult> GetCourseByName(string idd)
+        public async Task<IActionResult> GetCourseByName(Guid idd)
         {
             var result = await _courseService.GetCourse(idd);
 
@@ -50,7 +52,7 @@ namespace LLS.API.Controllers
         }
 
         [HttpPut("{idd}/Update")]
-        public async Task<IActionResult> UpdateCourseByName(string idd, CourseDto courseDto)
+        public async Task<IActionResult> UpdateCourseByName(Guid idd, CourseDto courseDto)
         {
             courseDto.Idd = idd;
 
@@ -60,7 +62,7 @@ namespace LLS.API.Controllers
         }
 
         [HttpGet("{idd}/Experiments")]
-        public async Task<IActionResult> GetExpAssignedToCourse(string idd)
+        public async Task<IActionResult> GetExpAssignedToCourse(Guid idd)
         {
             var result = await _courseService.GetExpAssignedToCourse(idd);
 
@@ -68,7 +70,7 @@ namespace LLS.API.Controllers
         }
 
         [HttpGet("{idd}/Students")]
-        public async Task<IActionResult> GetStudentAssignedToCourse(string idd)
+        public async Task<IActionResult> GetStudentAssignedToCourse(Guid idd)
         {
             var result = await _courseService.GetUsersAssignedToCourse(idd,"student");
 
@@ -76,7 +78,7 @@ namespace LLS.API.Controllers
         }
 
         [HttpGet("{idd}/Teachers")]
-        public async Task<IActionResult> GetTeachersAssignedToCourse(string idd)
+        public async Task<IActionResult> GetTeachersAssignedToCourse(Guid idd)
         {
             var result = await _courseService.GetUsersAssignedToCourse(idd, "teacher");
 
@@ -84,7 +86,7 @@ namespace LLS.API.Controllers
         }
 
         [HttpGet("{idd}/{role}")]
-        public async Task<IActionResult> GetTeachersAssignedToCourse(string idd,string role)
+        public async Task<IActionResult> GetTeachersAssignedToCourse(Guid idd,string role)
         {
             var result = await _courseService.GetUsersAssignedToCourse(idd, role);
 
@@ -92,7 +94,7 @@ namespace LLS.API.Controllers
         }
 
         [HttpPost("{idd}/Assign-Teacher")]
-        public async Task<IActionResult> AssignTeacherToCourse(string email, string idd)
+        public async Task<IActionResult> AssignTeacherToCourse(string email, Guid idd)
         {
             var result = await _courseService.AssignUserToCourse(email, idd,"teacher");
 
@@ -100,7 +102,7 @@ namespace LLS.API.Controllers
         }
 
         [HttpPost("{idd}/Assign-Students")]
-        public async Task<IActionResult> AssignStudentToCourse(List<string> emails, string idd)
+        public async Task<IActionResult> AssignStudentToCourse(List<string> emails, Guid idd)
         {
             foreach (var email in emails)
             {
@@ -116,7 +118,7 @@ namespace LLS.API.Controllers
         }
 
         [HttpPost("{idd}/Assign-User")]
-        public async Task<IActionResult> AssignUserToCourse(string email, string idd, string role)
+        public async Task<IActionResult> AssignUserToCourse(string email, Guid idd, string role)
         {
             var result = await _courseService.AssignUserToCourse(email, idd, role);
 
@@ -124,13 +126,12 @@ namespace LLS.API.Controllers
         }
 
         [HttpPost("{idd}/Assign-Experiment")]
-        public async Task<IActionResult> AssignExpToCourse(string idd, AssignExpDto assignExpDto)
+        public async Task<IActionResult> AssignExpToCourse(Guid idd, AssignExpDto assignExpDto)
         {
             var result = await _courseService.AssignExpToCourse(assignExpDto.ExpIdd, idd,
                                                                 assignExpDto.StartDate,
                                                                 assignExpDto.EndDate,
-                                                                assignExpDto.NumberOfTrials,
-                                                                assignExpDto.ResourceIds);
+                                                                assignExpDto.NumberOfTrials);
 
             return CheckResult(result);
         }
@@ -143,6 +144,5 @@ namespace LLS.API.Controllers
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int NumberOfTrials { get; set; }
-        public List<Guid> ResourceIds { get; set; }
     }
 }

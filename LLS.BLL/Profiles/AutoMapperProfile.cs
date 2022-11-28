@@ -21,8 +21,7 @@ namespace LLS.BLL.Profiles
 
 
             CreateMap<ExpDto, Experiment>().ReverseMap()
-                .ForMember(dest => dest.LLO, act => act.Ignore())
-                .ForMember(dest => dest.LLO_MA, act => act.Ignore());
+                .ForMember(dest => dest.LLO, act => act.Ignore());
 
             CreateMap<CourseDto, Course>().ReverseMap();
         }

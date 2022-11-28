@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LLS.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220703184547_454")]
-    partial class _454
+    [Migration("20221128185718_HEHE")]
+    partial class HEHE
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -30,7 +30,7 @@ namespace LLS.DAL.Migrations
                     b.Property<DateTime>("AddedDate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<string>("Code")
                         .HasColumnType("text");
 
                     b.Property<string>("Description")
@@ -39,8 +39,8 @@ namespace LLS.DAL.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("Idd")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Idd")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
@@ -133,6 +133,23 @@ namespace LLS.DAL.Migrations
                     b.ToTable("Expirments");
                 });
 
+            modelBuilder.Entity("LLS.Common.Models.Machine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("IP")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Machine");
+                });
+
             modelBuilder.Entity("LLS.Common.Models.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -168,7 +185,21 @@ namespace LLS.DAL.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("LLS.Common.Models.Student_ExpCourse", b =>
+            modelBuilder.Entity("LLS.Common.Models.Resource", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Resource");
+                });
+
+            modelBuilder.Entity("LLS.Common.Models.Resource_Exp", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -177,16 +208,87 @@ namespace LLS.DAL.Migrations
                     b.Property<Guid>("Exp_CourseId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("StudentId")
+                    b.Property<Guid>("ResourceId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Exp_CourseId");
 
+                    b.HasIndex("ResourceId");
+
+                    b.ToTable("Resource_Exp");
+                });
+
+            modelBuilder.Entity("LLS.Common.Models.Resource_Machine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MachineId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MachineId");
+
+                    b.HasIndex("ResourceId");
+
+                    b.ToTable("Resource_Machine");
+                });
+
+            modelBuilder.Entity("LLS.Common.Models.StudentCourse_ExpCourse", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Exp_CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Student_CourseId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Exp_CourseId");
+
+                    b.HasIndex("Student_CourseId");
+
+                    b.ToTable("StudentCourse_ExpCourses");
+                });
+
+            modelBuilder.Entity("LLS.Common.Models.StudentSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ExpCourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("MachineId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TimeSlot")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpCourseId");
+
+                    b.HasIndex("MachineId");
+
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Student_ExpCourses");
+                    b.ToTable("StudentSessions");
                 });
 
             modelBuilder.Entity("LLS.Common.Models.Student_Trial", b =>
@@ -194,9 +296,6 @@ namespace LLS.DAL.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("IsGraded")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("LRO")
                         .HasColumnType("text");
@@ -212,6 +311,9 @@ namespace LLS.DAL.Migrations
 
                     b.Property<float>("TotalTimeInMin")
                         .HasColumnType("real");
+
+                    b.Property<int>("TrialNumber")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -507,34 +609,97 @@ namespace LLS.DAL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("LLS.Common.Models.Student_ExpCourse", b =>
+            modelBuilder.Entity("LLS.Common.Models.Resource_Exp", b =>
                 {
                     b.HasOne("LLS.Common.Models.Exp_Course", "Exp_Course")
-                        .WithMany("Student_ExpCourses")
+                        .WithMany()
                         .HasForeignKey("Exp_CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LLS.Common.Models.User", "User")
-                        .WithMany("Student_ExpCourses")
-                        .HasForeignKey("StudentId")
+                    b.HasOne("LLS.Common.Models.Resource", "Resource")
+                        .WithMany("Resource_Exps")
+                        .HasForeignKey("ResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Exp_Course");
 
-                    b.Navigation("User");
+                    b.Navigation("Resource");
+                });
+
+            modelBuilder.Entity("LLS.Common.Models.Resource_Machine", b =>
+                {
+                    b.HasOne("LLS.Common.Models.Machine", "Machine")
+                        .WithMany("resource_machines")
+                        .HasForeignKey("MachineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LLS.Common.Models.Resource", "Resource")
+                        .WithMany("resource_machines")
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Machine");
+
+                    b.Navigation("Resource");
+                });
+
+            modelBuilder.Entity("LLS.Common.Models.StudentCourse_ExpCourse", b =>
+                {
+                    b.HasOne("LLS.Common.Models.Exp_Course", "Exp_Course")
+                        .WithMany("StudentCourse_ExpCourses")
+                        .HasForeignKey("Exp_CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LLS.Common.Models.User_Course", "Student_Course")
+                        .WithMany("StudentCourse_ExpCourses")
+                        .HasForeignKey("Student_CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exp_Course");
+
+                    b.Navigation("Student_Course");
+                });
+
+            modelBuilder.Entity("LLS.Common.Models.StudentSession", b =>
+                {
+                    b.HasOne("LLS.Common.Models.Exp_Course", "ExpCourse")
+                        .WithMany()
+                        .HasForeignKey("ExpCourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LLS.Common.Models.Machine", "Machine")
+                        .WithMany()
+                        .HasForeignKey("MachineId");
+
+                    b.HasOne("LLS.Common.Models.User", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ExpCourse");
+
+                    b.Navigation("Machine");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("LLS.Common.Models.Student_Trial", b =>
                 {
-                    b.HasOne("LLS.Common.Models.Student_ExpCourse", "Student_ExpCourse")
+                    b.HasOne("LLS.Common.Models.StudentCourse_ExpCourse", "StudentCourse_ExpCourse")
                         .WithMany("Trials")
                         .HasForeignKey("Student_ExpCourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Student_ExpCourse");
+                    b.Navigation("StudentCourse_ExpCourse");
                 });
 
             modelBuilder.Entity("LLS.Common.Models.User_Course", b =>
@@ -616,7 +781,7 @@ namespace LLS.DAL.Migrations
 
             modelBuilder.Entity("LLS.Common.Models.Exp_Course", b =>
                 {
-                    b.Navigation("Student_ExpCourses");
+                    b.Navigation("StudentCourse_ExpCourses");
                 });
 
             modelBuilder.Entity("LLS.Common.Models.Experiment", b =>
@@ -624,16 +789,31 @@ namespace LLS.DAL.Migrations
                     b.Navigation("Exp_Courses");
                 });
 
-            modelBuilder.Entity("LLS.Common.Models.Student_ExpCourse", b =>
+            modelBuilder.Entity("LLS.Common.Models.Machine", b =>
+                {
+                    b.Navigation("resource_machines");
+                });
+
+            modelBuilder.Entity("LLS.Common.Models.Resource", b =>
+                {
+                    b.Navigation("Resource_Exps");
+
+                    b.Navigation("resource_machines");
+                });
+
+            modelBuilder.Entity("LLS.Common.Models.StudentCourse_ExpCourse", b =>
                 {
                     b.Navigation("Trials");
                 });
 
             modelBuilder.Entity("LLS.Common.Models.User", b =>
                 {
-                    b.Navigation("Student_ExpCourses");
-
                     b.Navigation("User_Courses");
+                });
+
+            modelBuilder.Entity("LLS.Common.Models.User_Course", b =>
+                {
+                    b.Navigation("StudentCourse_ExpCourses");
                 });
 #pragma warning restore 612, 618
         }

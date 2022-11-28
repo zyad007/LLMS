@@ -48,7 +48,7 @@ namespace LLS.API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "LLS.API", Version = "v1" });
             });
 
-            services.AddDbContext<AppDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("heroku")));
+            services.AddDbContext<AppDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("elephant")));
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IExperimentService, ExperimentService>();

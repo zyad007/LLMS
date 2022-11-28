@@ -11,9 +11,10 @@ namespace LLS.Common.Models
     {
         
         public string Name { get; set; }
-        public string Idd { get; set; }
+        // need idd like exp and make courseCode
+        public Guid Idd { get; set; } = Guid.NewGuid();
+        public string Code { get; set; }
         public string Description { get; set; }
-        public string CreatedBy { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 

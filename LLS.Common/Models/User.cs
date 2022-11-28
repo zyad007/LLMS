@@ -19,8 +19,5 @@ namespace LLS.Common.Models
 
         //Assigned Courses for Student
         public List<User_Course> User_Courses { get; set; }
-
-        //Assigned Exp in sepcifec Course for Student
-        public List<Student_ExpCourse> Student_ExpCourses { get; set; }
     }
 }

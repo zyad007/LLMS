@@ -43,20 +43,20 @@ namespace LLS.DAL.Data
                 .WithMany(ba => ba.Exp_Courses)
                 .HasForeignKey(bi => bi.CourseId);
 
-            //Student_ExpCourse
-            builder.Entity<Student_ExpCourse>()
-                .HasOne(b => b.User)
-                .WithMany(ba => ba.Student_ExpCourses)
-                .HasForeignKey(bi => bi.StudentId);
+            //StudentCourse_ExpCourse
+            builder.Entity<StudentCourse_ExpCourse>()
+                .HasOne(b => b.Student_Course)
+                .WithMany(ba => ba.StudentCourse_ExpCourses)
+                .HasForeignKey(bi => bi.Student_CourseId);
 
-            builder.Entity<Student_ExpCourse>()
+            builder.Entity<StudentCourse_ExpCourse>()
                 .HasOne(b => b.Exp_Course)
-                .WithMany(ba => ba.Student_ExpCourses)
+                .WithMany(ba => ba.StudentCourse_ExpCourses)
                 .HasForeignKey(bi => bi.Exp_CourseId);
 
 
             builder.Entity<Student_Trial>()
-                .HasOne(b => b.Student_ExpCourse)
+                .HasOne(b => b.StudentCourse_ExpCourse)
                 .WithMany(x => x.Trials)
                 .HasForeignKey(x => x.Student_ExpCourseId);
 
@@ -71,16 +71,7 @@ namespace LLS.DAL.Data
                 .WithMany(ba => ba.resource_machines)
                 .HasForeignKey(bi => bi.MachineId);
 
-            // Resource_Exp
-            builder.Entity<Resource_Exp>()
-                .HasOne(b => b.Resource)
-                .WithMany(ba => ba.Resource_Exps)
-                .HasForeignKey(bi => bi.ResourceId);
 
-            builder.Entity<Resource_Exp>()
-                .HasOne(b => b.Exp_Course)
-                .WithMany(ba => ba.Resource_Exps)
-                .HasForeignKey(bi => bi.Exp_CourseId);
 
             base.OnModelCreating(builder);
         }
@@ -93,19 +84,19 @@ namespace LLS.DAL.Data
 
         public DbSet<Course> Courses { get; set; }
 
-        public DbSet<Machine> Machines { get; set; }
+        //public DbSet<Machine> Machines { get; set; }
 
-        public DbSet<Resource> Resources { get; set; }
+        //public DbSet<Resource> Resources { get; set; }
 
         public DbSet<StudentSession> StudentSessions { get; set; }
 
         //Joint Db
         public DbSet<Exp_Course> Exp_Courses { get; set; }
         public DbSet<User_Course> User_Courses { get; set; }
-        public DbSet<Student_ExpCourse> Student_ExpCourses { get; set; }
-        public DbSet<Resource_Machine> Resource_Machines { get; set; }
+        public DbSet<StudentCourse_ExpCourse> StudentCourse_ExpCourses { get; set; }
+        //public DbSet<Resource_Machine> Resource_Machines { get; set; }
         public DbSet<Student_Trial> Trials { get; set; }
-        public DbSet<Resource_Exp> Resource_Exps { get; set; }
+        //public DbSet<Resource_Exp> Resource_Exps { get; set; }
 
 
     }

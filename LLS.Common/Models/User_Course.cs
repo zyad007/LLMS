@@ -24,5 +24,8 @@ namespace LLS.Common.Models
         public Course Course { get; set; }
 
         public string Role { get; set; }
+
+        //Realtion
+        public List<StudentCourse_ExpCourse> StudentCourse_ExpCourses { get; set; }
     }
 }

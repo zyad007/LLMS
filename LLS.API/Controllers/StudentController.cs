@@ -32,29 +32,29 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
-        [HttpPost("Submit")]
-        public async Task<IActionResult> SubmintExp(StudentSubmit studentSubmit)
-        {
-            var res = await _sudentService.SubmitExp(studentSubmit);
+        //[HttpPost("Submit")]
+        //public async Task<IActionResult> SubmintExp(StudentSubmit studentSubmit)
+        //{
+        //    var res = await _sudentService.SubmitExp(studentSubmit);
 
-            return CheckResult(res);
-        }
+        //    return CheckResult(res);
+        //}
 
-        [HttpGet("Result")]
-        public async Task<IActionResult> GetStudentResults(string email, string courseIdd, Guid expIdd)
-        {
-            var res = await _sudentService.GetStudentResult(email, courseIdd, expIdd);
+        //[HttpGet("Result")]
+        //public async Task<IActionResult> GetStudentResults(string email, string courseIdd, Guid expIdd)
+        //{
+        //    var res = await _sudentService.GetStudentResult(email, courseIdd, expIdd);
 
-            return CheckResult(res);
-        }
+        //    return CheckResult(res);
+        //}
 
-        [HttpPost("Resrve-TimeSlot")]
-        public async Task<IActionResult> ReserveTimeSlotAPI(string email, Guid expIdd, string courseIdd, int timeSlot)
-        {
-            var res = await _sudentService.ReserveTimeSlot(email, expIdd, courseIdd, timeSlot);
+        //[HttpPost("Resrve-TimeSlot")]
+        //public async Task<IActionResult> ReserveTimeSlotAPI(string email, Guid expIdd, string courseIdd, int timeSlot)
+        //{
+        //    var res = await _sudentService.ReserveTimeSlot(email, expIdd, courseIdd, timeSlot);
 
-            return CheckResult(res);
-        }
+        //    return CheckResult(res);
+        //}
 
 
 

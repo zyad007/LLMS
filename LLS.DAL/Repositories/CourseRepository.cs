@@ -17,10 +17,12 @@ namespace LLS.DAL.Repositories
 
         }
 
-        public async Task<Course> GetByIdd(string idd)
+        public async Task<Course> GetByIdd(Guid idd)
         {
-            return await _set.FirstOrDefaultAsync(x => x.Idd.ToLower() == idd.ToLower());
+            return await _set.FirstOrDefaultAsync(x => x.Idd == idd);
         }
+
+        
 
         public async Task Update(Course course)
         {

@@ -12,8 +12,8 @@ namespace LLS.BLL.IServices
     {
         Task<Result> GetAssignedExpForStudent(string email);
         Task<Result> GetStudentCourses(string email);
-        Task<Result> SubmitExp(StudentSubmit submit);
-        Task<Result> GetStudentResult(string email, string courseIdd, Guid expIdd);
-        Task<Result> ReserveTimeSlot(string email, Guid expIdd, string courseIdd, int timeSlot);
+        //Task<Result> SubmitExp(StudentSubmit submit);
+        //Task<Result> GetStudentResult(string email, string courseIdd, Guid expIdd);
+        //Task<Result> ReserveTimeSlot(string email, Guid expIdd, string courseIdd, int timeSlot);
     }
 }

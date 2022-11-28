@@ -19,6 +19,9 @@ namespace LLS.DAL.Repositories
             _set = context.Set<T>();
         }
 
+        // Check if entity exist retrun boolean
+        // Generic Update Method using the _context.Update();
+
         public async Task<bool> Create(T entity)
         { 
             var res = await _set.AddAsync(entity);

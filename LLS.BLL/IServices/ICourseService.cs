@@ -11,17 +11,17 @@ namespace LLS.BLL.IServices
     public interface ICourseService
     {
         Task<Result> CreateCourse(CourseDto courseDto);
-        Task<Result> DeleteCourse(string idd);
+        Task<Result> DeleteCourse(Guid idd);
         Task<Result> GetAllCourses();
-        Task<Result> GetCourse(string idd);
+        Task<Result> GetCourse(Guid idd);
         Task<Result> UpdateCourse(CourseDto courseDto);
 
-        Task<Result> AssignUserToCourse(string email, string idd, string role);
-        Task<Result> GetUsersAssignedToCourse(string idd, string role);
+        Task<Result> AssignUserToCourse(string email, Guid idd, string role);
+        Task<Result> GetUsersAssignedToCourse(Guid idd, string role);
 
 
-        Task<Result> AssignExpToCourse(Guid expIdd, string courseIdd, DateTime startDate, DateTime endDate, int trials, List<Guid> resourcesId);
-        Task<Result> GetExpAssignedToCourse(string idd);
+        Task<Result> AssignExpToCourse(Guid expIdd, Guid courseIdd, DateTime startDate, DateTime endDate, int trials);
+        Task<Result> GetExpAssignedToCourse(Guid idd);
 
 
     }

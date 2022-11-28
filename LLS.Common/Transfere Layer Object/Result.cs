@@ -8,6 +8,7 @@ namespace LLS.Common.Transfere_Layer_Object
 {
     public class Result
     {
+        //Constructor that takes (statusCode, Message, Data?)
         public object Data { get; set; }
         public object Message { get; set; }
         public bool Status { get; set; }

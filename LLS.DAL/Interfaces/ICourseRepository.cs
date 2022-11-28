@@ -9,7 +9,7 @@ namespace LLS.DAL.Interfaces
 {
     public interface ICourseRepository : IRepository<Course>
     {
-        Task<Course> GetByIdd(string idd);
+        Task<Course> GetByIdd(Guid idd);
         Task Update(Course course);
     }
 }
