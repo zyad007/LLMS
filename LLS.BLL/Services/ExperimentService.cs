@@ -225,7 +225,7 @@ namespace LLS.BLL.Services
 
             return new Result()
             {
-                Status = true,
+                Status = false,
                 Message = "No llo for this exp yet"
             };
         }

@@ -1,6 +1,8 @@
 ﻿using LLS.BLL.IServices;
 using LLS.Common.Dto;
 using LLS.Common.Transfere_Layer_Object;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -35,6 +37,8 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
+
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "test")]
         [HttpGet]
         public async Task<IActionResult> GetListOfCourses()
         {

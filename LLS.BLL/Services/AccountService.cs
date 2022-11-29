@@ -243,7 +243,7 @@ namespace LLS.BLL.Services
             var claims = await GetValidClaims(user);
 
             var token = new JwtSecurityToken(
-                expires: DateTime.UtcNow.AddSeconds(10),
+                expires: DateTime.UtcNow.AddHours(10),
                 claims: claims,
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256));
 
@@ -279,15 +279,13 @@ namespace LLS.BLL.Services
             var claims = new List<Claim>
             {
                 new Claim("Id", user.Id),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email), // Unique id
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // id for Token used for refresh token
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // id for Token used for refresh token
             };
 
             // Getting the claims that we have assigned to user
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            claims.AddRange(userClaims);
+            //var userClaims = await _userManager.GetClaimsAsync(user);
+            //claims.AddRange(userClaims);
 
             var userRoles = await _userManager.GetRolesAsync(user);
 
@@ -298,12 +296,12 @@ namespace LLS.BLL.Services
                     var _role = await _roleManager.FindByNameAsync(userRole);
                     if (_role != null)
                     {
-                        claims.Add(new Claim(ClaimTypes.Role, userRole));
+                        claims.Add(new Claim("Roles", userRole));
 
                         var roleClaims = await _roleManager.GetClaimsAsync(_role);
                         foreach (var roleClaim in roleClaims)
                         {
-                            claims.Add(roleClaim);
+                            claims.Add(new Claim("Claims",roleClaim.Value));
                         }
                     }
                 }

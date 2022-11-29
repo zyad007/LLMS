@@ -88,6 +88,14 @@ namespace LLS.API
                   jwt.TokenValidationParameters = _tokenValidationParameters;
               });
 
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("test",
+                    policy => policy.RequireClaim("test"));
+                options.AddPolicy("test",
+                    policy => policy.RequireClaim("test2"));
+            });
+
             services.AddIdentity<IdentityUser, IdentityRole>(options
                                 => options.SignIn.RequireConfirmedAccount = true)
               .AddEntityFrameworkStores<AppDbContext>();
