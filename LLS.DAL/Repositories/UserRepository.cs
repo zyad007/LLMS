@@ -22,9 +22,14 @@ namespace LLS.DAL.Repositories
             return await _set.FirstOrDefaultAsync(x=> x.Email.ToLower() == email.ToLower());
         }
 
+        public async Task<User> GetByIdd(Guid idd)
+        {
+            return await _set.FirstOrDefaultAsync(x => x.Idd == idd);
+        }
+
         public async Task Update(User user)
         {
-            var res = await _set.FirstOrDefaultAsync(x => x.Email.ToLower() == user.Email.ToLower());
+            var res = await _set.FirstOrDefaultAsync(x => x.Idd == user.Idd);
 
             res.FirstName = user.FirstName;
             res.Lastname = user.Lastname;

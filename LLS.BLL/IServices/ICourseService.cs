@@ -16,7 +16,7 @@ namespace LLS.BLL.IServices
         Task<Result> GetCourse(Guid idd);
         Task<Result> UpdateCourse(CourseDto courseDto);
 
-        Task<Result> AssignUserToCourse(string email, Guid idd, string role);
+        Task<Result> AssignUserToCourse(Guid userIdd, Guid idd, string role);
         Task<Result> GetUsersAssignedToCourse(Guid idd, string role);
 
 

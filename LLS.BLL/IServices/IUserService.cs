@@ -14,8 +14,9 @@ namespace LLS.BLL.IServices
     {
         Task<Result> AddUser(SignUp signUp);
         Task<Result> UpdateUser(UserDto userDto);
-        Task<Result> DeleteUser(string email);
+        Task<Result> DeleteUser(Guid userIdd);
         Task<Result> GetUserByEmail(string email);
+        Task<Result> GetUserByIdd(Guid userIdd);
         Task<Result> GetAllUsers();
         Task<Result> GetAllUserWithRole(string role);
     }

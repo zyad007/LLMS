@@ -1,4 +1,4 @@
-﻿using LLS.Common.Transfere_Layer_Object;
+﻿using LLS.Common.Models.Mail;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace LLS.BLL.IServices
 {
-    public interface ITeacherService
+    public interface IMailService
     {
-        Task<Result> GetTeacherCourses(Guid userIdd);
+        Task SendEmailAsync(MailRequest mailRequest);
     }
 }

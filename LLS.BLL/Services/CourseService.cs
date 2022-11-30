@@ -159,7 +159,7 @@ namespace LLS.BLL.Services
 
         //
 
-        public async Task<Result> AssignUserToCourse(string email, Guid idd,string role)
+        public async Task<Result> AssignUserToCourse(Guid userIdd, Guid idd,string role)
         {
             var course = await _unitOfWork.Courses.GetByIdd(idd);
             if (course == null)
@@ -169,7 +169,7 @@ namespace LLS.BLL.Services
                     Message = "Course doesn't exists"
                 };
 
-            var user = await _unitOfWork.Users.GetByEmail(email);
+            var user = await _unitOfWork.Users.GetByIdd(userIdd);
             if (user == null)
                 return new Result()
                 {

@@ -9,12 +9,13 @@ namespace LLS.Common.Models
     public class User : BaseEntity
     {
         public Guid IdentityId { get; set; }
+        public Guid Idd { get; set; } = Guid.NewGuid();
         public string FirstName { get; set; }
         public string Lastname { get; set; }
         public string Email { get; set; }
-        public int PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; }
         public string Country { get; set; }
-        public string Role { get; set; } = "User";
+        public string Role { get; set; } = "user";
         public string AcademicYear { get; set; }
 
         //Assigned Courses for Student

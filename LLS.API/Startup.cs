@@ -2,6 +2,7 @@ using LLS.BLL.Configs;
 using LLS.BLL.IServices;
 using LLS.BLL.Profiles;
 using LLS.BLL.Services;
+using LLS.BLL.Settings;
 using LLS.DAL.Data;
 using LLS.DAL.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -38,6 +39,7 @@ namespace LLS.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<JwtConfig>(Configuration.GetSection("JwtConfig"));
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
 
             services.AddControllers().AddJsonOptions(options =>
             {
@@ -57,6 +59,7 @@ namespace LLS.API
             services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<IStudentService, StudentService>();
             services.AddScoped<ITeacherService, TeacherService>();
+            services.AddScoped<IMailService, MailService>();
 
             // Getting the secret from Config
             var key = Encoding.ASCII.GetBytes(Configuration["JwtConfig:Secret"]);
@@ -107,6 +110,8 @@ namespace LLS.API
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
+
+                options.SignIn.RequireConfirmedEmail = true;
             });
 
             services.AddAutoMapper(typeof(AutoMapperProfile));

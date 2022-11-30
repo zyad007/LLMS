@@ -10,6 +10,7 @@ namespace LLS.Common.Dto.Logins
     {
         public string Email { get; set; }
         public string Role { get; set; }
+        public Guid Idd { get; set; }
         public string Token { get; set; }
         public string RefreshToken { get; set; }
         public bool Status { get; set; }

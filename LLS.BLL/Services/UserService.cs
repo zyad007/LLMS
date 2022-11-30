@@ -61,8 +61,7 @@ namespace LLS.BLL.Services
             {
                 Email = signUp.Email,
                 UserName = signUp.Email,
-                EmailConfirmed = true //To Update to confirm email
-
+                EmailConfirmed = false //To Update to confirm email
             };
 
             var isCreated = await _userManager.CreateAsync(newUser, signUp.Password);
@@ -112,6 +111,60 @@ namespace LLS.BLL.Services
             };
         }
 
+        public async Task<string> RegisterUser1(RegisterUser user)
+        {
+            //Check if Email already Exisit
+            var userExist = await _unitOfWork.Users.GetByEmail(user.Email);
+
+            if (userExist != null) //Email exists
+            {
+                return $"[{user.Email}]: Email already in use";
+            }
+
+            //Add the user
+            var newUser = new IdentityUser()
+            {
+                Email = user.Email,
+                UserName = user.Email,
+                EmailConfirmed = false //To Update to confirm email
+            };
+
+            var isCreated = await _userManager.CreateAsync(newUser, "R00t@R00t");
+            if (!isCreated.Succeeded)
+            {
+                return $"[{user.Email}]: some thing went wrong";
+            }
+
+            //Add user to Db
+            var userDb = new User();
+            userDb.IdentityId = new Guid(newUser.Id);
+            userDb.FirstName = user.firstName;
+            userDb.Lastname = user.lastName;
+            userDb.Country = user.country;
+            userDb.PhoneNumber = user.phoneNumber;
+            userDb.AcademicYear = user.academicYear;
+            userDb.Email = user.Email;
+
+            var result = await _unitOfWork.Users.Create(userDb);
+
+            //Add Default Role to User
+            if (await _roleManager.RoleExistsAsync("user") == true)
+            {
+                await _unitOfWork.Roles.AddRole("user");
+            }
+            await _userManager.AddToRoleAsync(newUser, "user");
+
+            //Add Role to User
+            var roleResult = await _unitOfWork.Roles.AddUserToRole("user", userDb.Email);
+
+            await _unitOfWork.SaveAsync();
+
+            //Send Confimation Email to set password
+
+
+            return $"[{user.Email}]: Added successfully";
+        }
+
         public async Task<Result> GetAllUsers()
         {
             var users = await _unitOfWork.Users.GetAll();
@@ -152,9 +205,30 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> DeleteUser(string email)
+        public async Task<Result> GetUserByIdd(Guid userIdd)
         {
-            var user = await _unitOfWork.Users.GetByEmail(email);
+            var user = await _unitOfWork.Users.GetByIdd(userIdd);
+            if (user == null)
+            {
+                return new Result()
+                {
+                    Status = false,
+                    Message = "No User doesn't exist"
+                };
+            }
+
+            var userDto = _iMapper.Map<UserDto>(user);
+
+            return new Result()
+            {
+                Status = true,
+                Data = userDto
+            };
+        }
+
+        public async Task<Result> DeleteUser(Guid userIdd)
+        {
+            var user = await _unitOfWork.Users.GetByIdd(userIdd);
             if (user == null)
             {
                 return new Result()
@@ -176,7 +250,7 @@ namespace LLS.BLL.Services
 
         public async Task<Result> UpdateUser(UserDto userDto)
         {
-            var user = await _unitOfWork.Users.GetByEmail(userDto.Email);
+            var user = await _unitOfWork.Users.GetByIdd(userDto.Idd);
             if (user == null)
             {
                 return new Result()
@@ -185,6 +259,8 @@ namespace LLS.BLL.Services
                     Message = "User doesn't exist"
                 };
             }
+
+            //userDto.Role = null;
 
             var newUser = _iMapper.Map<User>(userDto);
 
@@ -227,6 +303,16 @@ namespace LLS.BLL.Services
                 Data = userDtos
             };
 
+        }
+
+        public class RegisterUser
+        {
+            public string Email { get; set; }
+            public string firstName { get; set; }
+            public string lastName { get; set; }
+            public string country { get; set; }
+            public string phoneNumber { get; set; }
+            public string academicYear { get; set; }
         }
     }
 }

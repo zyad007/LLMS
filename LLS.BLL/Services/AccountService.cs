@@ -66,6 +66,7 @@ namespace LLS.BLL.Services
                 var jwtToken = await GenerateJwtToken(userExist);
                 jwtToken.Role = user.Role;
                 jwtToken.Email = user.Email;
+                jwtToken.Idd = user.Idd;
                 return jwtToken;
             }
             else
@@ -286,6 +287,7 @@ namespace LLS.BLL.Services
             // Getting the claims that we have assigned to user
             //var userClaims = await _userManager.GetClaimsAsync(user);
             //claims.AddRange(userClaims);
+
 
             var userRoles = await _userManager.GetRolesAsync(user);
 

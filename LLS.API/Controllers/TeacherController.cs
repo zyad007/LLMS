@@ -1,6 +1,7 @@
 ﻿using LLS.BLL.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace LLS.API.Controllers
@@ -14,9 +15,9 @@ namespace LLS.API.Controllers
         }
 
         [HttpGet("Courses")]
-        public async Task<IActionResult> GetTeacherCourse(string email)
+        public async Task<IActionResult> GetTeacherCourse(Guid userIdd)
         {
-            var res = await _teacherService.GetTeacherCourses(email);
+            var res = await _teacherService.GetTeacherCourses(userIdd);
             return CheckResult(res);
         }
     }

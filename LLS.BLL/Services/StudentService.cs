@@ -30,9 +30,9 @@ namespace LLS.BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<Result> GetAssignedExpForStudent(string email)
+        public async Task<Result> GetAssignedExpForStudent(Guid userIdd)
         {
-            var user = await _unitOfWork.Users.GetByEmail(email);
+            var user = await _unitOfWork.Users.GetByIdd(userIdd);
             if(user == null)
             {
                 return new Result()
@@ -84,9 +84,9 @@ namespace LLS.BLL.Services
 
         }
 
-        public async Task<Result> GetStudentCourses(string email)
+        public async Task<Result> GetStudentCourses(Guid userIdd)
         {
-            var user = await _unitOfWork.Users.GetByEmail(email);
+            var user = await _unitOfWork.Users.GetByIdd(userIdd);
             if (user == null)
             {
                 return new Result()

@@ -4,6 +4,7 @@ using LLS.Common.Dto.Logins;
 using LLS.Common.Transfere_Layer_Object;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -42,6 +43,14 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
+        [HttpGet("{idd}")]
+        public async Task<IActionResult> GetUserByIdd(Guid userIdd)
+        {
+            var res = await _userService.GetUserByIdd(userIdd);
+
+            return CheckResult(res);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAllUser()
         {
@@ -51,9 +60,9 @@ namespace LLS.API.Controllers
         }
 
         [HttpDelete("Delete")]
-        public async Task<IActionResult> DeleteUser(string email)
+        public async Task<IActionResult> DeleteUser(Guid userIdd)
         {
-            var res = await _userService.DeleteUser(email);
+            var res = await _userService.DeleteUser(userIdd);
 
             return CheckResult(res);
         }
@@ -66,7 +75,7 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
-        [HttpGet("Get-Users-With-Role")]
+        [HttpGet("Get-All-Users-With-Role")]
         public async Task<IActionResult> GetAllUsersWithRole(string role)
         {
             var res = await _userService.GetAllUserWithRole(role);

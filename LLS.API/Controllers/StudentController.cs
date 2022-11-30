@@ -17,17 +17,17 @@ namespace LLS.API.Controllers
         }
 
         [HttpGet("Experiments")]
-        public async Task<IActionResult> GetAllExpAssignedToStudent(string email)
+        public async Task<IActionResult> GetAllExpAssignedToStudent(Guid userIdd)
         {
-            var res = await _sudentService.GetAssignedExpForStudent(email);
+            var res = await _sudentService.GetAssignedExpForStudent(userIdd);
 
             return CheckResult(res);
         }
 
         [HttpGet("Courses")]
-        public async Task<IActionResult> GetStudentCourses(string email)
+        public async Task<IActionResult> GetStudentCourses(Guid userIdd)
         {
-            var res = await _sudentService.GetStudentCourses(email);
+            var res = await _sudentService.GetStudentCourses(userIdd);
 
             return CheckResult(res);
         }

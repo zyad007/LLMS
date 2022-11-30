@@ -24,9 +24,9 @@ namespace LLS.BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<Result> GetTeacherCourses(string email)
+        public async Task<Result> GetTeacherCourses(Guid userIdd)
         {
-            var user = await _unitOfWork.Users.GetByEmail(email);
+            var user = await _unitOfWork.Users.GetByIdd(userIdd);
             if (user == null)
             {
                 return new Result()

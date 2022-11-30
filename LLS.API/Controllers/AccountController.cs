@@ -60,7 +60,8 @@ namespace LLS.API.Controllers
                     authResult.Token,
                     authResult.RefreshToken,
                     authResult.Email,
-                    authResult.Role
+                    authResult.Role,
+                    authResult.Idd
                 },
                 Message = authResult.Error,
                 Status = authResult.Status

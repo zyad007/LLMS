@@ -98,19 +98,19 @@ namespace LLS.API.Controllers
         }
 
         [HttpPost("{idd}/Assign-Teacher")]
-        public async Task<IActionResult> AssignTeacherToCourse(string email, Guid idd)
+        public async Task<IActionResult> AssignTeacherToCourse(Guid userIdd, Guid courseIdd)
         {
-            var result = await _courseService.AssignUserToCourse(email, idd,"teacher");
+            var result = await _courseService.AssignUserToCourse(userIdd, courseIdd, "teacher");
 
             return CheckResult(result);
         }
 
         [HttpPost("{idd}/Assign-Students")]
-        public async Task<IActionResult> AssignStudentToCourse(List<string> emails, Guid idd)
+        public async Task<IActionResult> AssignStudentToCourse(List<Guid> userIdds, Guid idd)
         {
-            foreach (var email in emails)
+            foreach (var userIdd in userIdds)
             {
-                await _courseService.AssignUserToCourse(email, idd, "student");
+                await _courseService.AssignUserToCourse(userIdd, idd, "student");
             }
             var result = new Result()
             {
@@ -122,9 +122,9 @@ namespace LLS.API.Controllers
         }
 
         [HttpPost("{idd}/Assign-User")]
-        public async Task<IActionResult> AssignUserToCourse(string email, Guid idd, string role)
+        public async Task<IActionResult> AssignUserToCourse(Guid userIdd, Guid idd, string role)
         {
-            var result = await _courseService.AssignUserToCourse(email, idd, role);
+            var result = await _courseService.AssignUserToCourse(userIdd, idd, role);
 
             return CheckResult(result);
         }

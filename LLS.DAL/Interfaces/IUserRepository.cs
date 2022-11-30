@@ -10,6 +10,7 @@ namespace LLS.DAL.Interfaces
     public interface IUserRepository : IRepository<User>
     {
         Task<User> GetByEmail(string email);
+        Task<User> GetByIdd(Guid idd);
         Task Update(User user);
     }
 }
