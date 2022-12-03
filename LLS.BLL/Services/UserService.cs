@@ -83,15 +83,19 @@ namespace LLS.BLL.Services
 
             var result = await _unitOfWork.Users.Create(user);
 
-            //Add Default Role to User
-            if (await _roleManager.RoleExistsAsync("User") == true)
-            {
-                await _unitOfWork.Roles.AddRole("User");
-            }
-            await _userManager.AddToRoleAsync(newUser, "User");
 
             //Add Role to User
-            var roleResult = await _unitOfWork.Roles.AddUserToRole(signUp.Role.ToLower(), signUp.Email);
+            var role = await _roleManager.FindByNameAsync(signUp.Role.ToLower());
+            if(role == null)
+            {
+                return new Result()
+                {
+                    Status = false,
+                    Message = "Role doesn't exist"
+                };
+            }
+
+            var roleResult = await _unitOfWork.Roles.AddUserToRole(new Guid(role.Id), signUp.Email);
             if (roleResult.Status == false)
             {
                 return new Result()
@@ -148,14 +152,14 @@ namespace LLS.BLL.Services
             var result = await _unitOfWork.Users.Create(userDb);
 
             //Add Default Role to User
-            if (await _roleManager.RoleExistsAsync("user") == true)
-            {
-                await _unitOfWork.Roles.AddRole("user");
-            }
-            await _userManager.AddToRoleAsync(newUser, "user");
+            //if (await _roleManager.RoleExistsAsync("user") == true)
+            //{
+            //    await _unitOfWork.Roles.AddRole("user");
+            //}
+            //await _userManager.AddToRoleAsync(newUser, "user");
 
             //Add Role to User
-            var roleResult = await _unitOfWork.Roles.AddUserToRole("user", userDb.Email);
+            //var roleResult = await _unitOfWork.Roles.AddUserToRole("user", userDb.Email);
 
             await _unitOfWork.SaveAsync();
 

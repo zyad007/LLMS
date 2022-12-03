@@ -285,6 +285,7 @@ namespace LLS.BLL.Services
             };
 
             // Getting the claims that we have assigned to user
+            //await _userManager.AddClaimAsync(user,new Claim("AddDeleteEdit_Course", "AddDeleteEdit_Course"));
             //var userClaims = await _userManager.GetClaimsAsync(user);
             //claims.AddRange(userClaims);
 
@@ -301,14 +302,10 @@ namespace LLS.BLL.Services
                         claims.Add(new Claim("Roles", userRole));
 
                         var roleClaims = await _roleManager.GetClaimsAsync(_role);
-                        foreach (var roleClaim in roleClaims)
-                        {
-                            claims.Add(new Claim("Claims",roleClaim.Value));
-                        }
+                        claims.AddRange(roleClaims);
                     }
                 }
             }
-
             return claims;
         }
 

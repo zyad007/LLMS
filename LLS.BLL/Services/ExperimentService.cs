@@ -162,7 +162,7 @@ namespace LLS.BLL.Services
 
             var exp = _iMapper.Map<Experiment>(expDto);
 
-            FetchDtoIntoLLO(exp, expDto.LLO);
+            //FetchDtoIntoLLO(exp, expDto.LLO);
 
             await _unitOfWork.Experiments.Update(exp);
             await _unitOfWork.SaveAsync();

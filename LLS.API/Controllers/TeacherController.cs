@@ -1,4 +1,6 @@
 ﻿using LLS.BLL.IServices;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -14,10 +16,12 @@ namespace LLS.API.Controllers
             _teacherService = teacherService;
         }
 
-        [HttpGet("Courses")]
-        public async Task<IActionResult> GetTeacherCourse(Guid userIdd)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "GetAssignedCourse_Teacher")]
+        [HttpGet("{idd}/Courses")]
+        public async Task<IActionResult> GetTeacherCourse(Guid idd)
         {
-            var res = await _teacherService.GetTeacherCourses(userIdd);
+            var res = await _teacherService.GetTeacherCourses(idd);
             return CheckResult(res);
         }
     }

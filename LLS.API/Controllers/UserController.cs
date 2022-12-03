@@ -2,6 +2,8 @@
 using LLS.Common.Dto;
 using LLS.Common.Dto.Logins;
 using LLS.Common.Transfere_Layer_Object;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -17,6 +19,7 @@ namespace LLS.API.Controllers
         {
             _userService = userService;
         }
+
 
         [HttpPost("SignUp")]
         public async Task<IActionResult> SingUp(SignUp signUp)
@@ -43,7 +46,7 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
-        [HttpGet("{idd}")]
+        [HttpGet("{userIdd}")]
         public async Task<IActionResult> GetUserByIdd(Guid userIdd)
         {
             var res = await _userService.GetUserByIdd(userIdd);
@@ -59,6 +62,8 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_User")]
         [HttpDelete("Delete")]
         public async Task<IActionResult> DeleteUser(Guid userIdd)
         {
@@ -67,6 +72,8 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_User")]
         [HttpPut("Update")]
         public async Task<IActionResult> UpdateUser(UserDto userDto)
         {

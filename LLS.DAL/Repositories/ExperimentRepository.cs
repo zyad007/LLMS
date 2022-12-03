@@ -26,7 +26,6 @@ namespace LLS.DAL.Repositories
             var res = await _set.FirstOrDefaultAsync(x=>x.Idd == exp.Idd);
 
             res.Description = exp.Description;
-            res.LLO = exp.LLO;
             res.Name = exp.Name;
 
             res.UpdateDate = DateTime.Now;

@@ -1,5 +1,7 @@
 ﻿using LLS.BLL.IServices;
 using LLS.Common.Dto;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -16,18 +18,22 @@ namespace LLS.API.Controllers
             _sudentService = sudentService;
         }
 
-        [HttpGet("Experiments")]
-        public async Task<IActionResult> GetAllExpAssignedToStudent(Guid userIdd)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "GetAssignedExp_Student")]
+        [HttpGet("{idd}/Experiments")]
+        public async Task<IActionResult> GetAllExpAssignedToStudent(Guid idd)
         {
-            var res = await _sudentService.GetAssignedExpForStudent(userIdd);
+            var res = await _sudentService.GetAssignedExpForStudent(idd);
 
             return CheckResult(res);
         }
 
-        [HttpGet("Courses")]
-        public async Task<IActionResult> GetStudentCourses(Guid userIdd)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "GetAssignedCourse_Student")]
+        [HttpGet("{idd}/Courses")]
+        public async Task<IActionResult> GetStudentCourses(Guid idd)
         {
-            var res = await _sudentService.GetStudentCourses(userIdd);
+            var res = await _sudentService.GetStudentCourses(idd);
 
             return CheckResult(res);
         }

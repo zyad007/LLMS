@@ -93,10 +93,48 @@ namespace LLS.API
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("test",
-                    policy => policy.RequireClaim("test"));
-                options.AddPolicy("test",
-                    policy => policy.RequireClaim("test2"));
+                options.AddPolicy("AddDeleteEdit_User",
+                    policy => policy.RequireClaim("AddDeleteEdit_User"));
+
+                options.AddPolicy("AddDeleteEdit_Course",
+                    policy => policy.RequireClaim("AddDeleteEdit_Course"));
+
+                options.AddPolicy("AddDeleteEdit_Exp",
+                    policy => policy.RequireClaim("AddDeleteEdit_Exp"));
+
+                options.AddPolicy("AddDeleteEdit_Role",
+                    policy => policy.RequireClaim("AddDeleteEdit_Role"));
+
+                options.AddPolicy("AssignExpToCourse",
+                    policy => policy.RequireClaim("AssignExpToCourse"));
+
+                options.AddPolicy("AssignUserToCourse",
+                    policy => policy.RequireClaim("AssignUserToCourse"));
+
+                // To Do
+                options.AddPolicy("RemoveExpFromCourse",
+                    policy => policy.RequireClaim("RemoveExpFromCourse"));
+                // To Do
+                options.AddPolicy("RemoveUserFromCourse",
+                    policy => policy.RequireClaim("RemoveUserFromCourse"));
+
+                options.AddPolicy("AssignRoleToUser",
+                    policy => policy.RequireClaim("AssignRoleToUser"));
+
+                options.AddPolicy("GetAssignedExp_Student",
+                    policy => policy.RequireClaim("GetAssignedExp_Student"));
+
+                options.AddPolicy("SubmitAssignedExp_Student",
+                    policy => policy.RequireClaim("SubmitAssignedExp_Student"));
+
+                options.AddPolicy("GetAssignedCourse_Student",
+                    policy => policy.RequireClaim("GetAssignedCourse_Student"));
+
+                options.AddPolicy("GetAssignedCourse_Teacher",
+                    policy => policy.RequireClaim("GetAssignedCourse_Teacher"));
+                //To do
+                options.AddPolicy("ResetUserPassword",
+                    policy => policy.RequireClaim("ResetUserPassword"));
             });
 
             services.AddIdentity<IdentityUser, IdentityRole>(options

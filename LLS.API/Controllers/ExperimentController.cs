@@ -2,6 +2,8 @@
 using LLS.Common.Dto;
 using LLS.Common.Models;
 using LLS.Common.Models.LLO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -33,8 +35,9 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Exp")]
         [HttpPost("Create")]
-        
         public async Task<IActionResult> CreateExp([FromBody]CreateExp create) 
         {
             var expDto = new ExpDto()
@@ -47,6 +50,8 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Exp")]
         [HttpPost("CreateLLO")]
         public async Task<IActionResult> CreateLLO(Guid idd, LLO llo)
         {
@@ -54,6 +59,8 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Exp")]
         [HttpPut("{idd}/EditLLO")]
         public async Task<IActionResult> EditLLO(Guid idd, LLO llo)
         {
@@ -68,6 +75,8 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Exp")]
         [HttpDelete("Delete")]
         public async Task<IActionResult> DeleteExp(Guid idd)
         {
@@ -75,9 +84,17 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
-        [HttpPut("Update")]
-        public async Task<IActionResult> UpdateExp(ExpDto expDto)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Exp")]
+        [HttpPut("/{idd}/Update")]
+        public async Task<IActionResult> UpdateExp(Guid idd,[FromBody]CreateExp expUpdate)
         {
+            var expDto = new ExpDto()
+            {
+                Idd = idd,
+                Name = expUpdate.name,
+                Description = expUpdate.description
+            };
             var res = await _experimentService.UpdateExp(expDto);
             return CheckResult(res);
         }

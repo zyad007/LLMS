@@ -11,9 +11,9 @@ namespace LLS.DAL.Interfaces
     {
         Task<Result> AddRole(string roleName);
         Task<Result> GetAllUsers();
-        Task<Result> AddUserToRole(string roleName, string email);
+        Task<Result> AddUserToRole(Guid idd, string email);
         Task<Result> GetUserRoles(string email);
-        Task<Result> RemoveRoleFromUser(string email, string roleName);
-        Task<Result> DeleteRole(string roleName);
+        Task<Result> RemoveRoleFromUser(Guid idd, string roleName);
+        Task<Result> DeleteRole(Guid idd);
     }
 }

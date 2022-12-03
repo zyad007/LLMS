@@ -29,9 +29,9 @@ namespace LLS.DAL.Repositories
 
         public async Task<Result> AddRole(string roleName)
         {
-            var roleExist = await _roleManager.RoleExistsAsync(roleName);
+            var roleExist = await _roleManager.FindByNameAsync(roleName.ToLower());
 
-            if (!roleExist)
+            if (roleExist == null)
             {
                 var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
 
@@ -39,13 +39,13 @@ namespace LLS.DAL.Repositories
                 {
                     return new Result()
                     {
-                        Data = $"The Role {roleName} hase been added successfully",
+                        Data = $"The Role {roleName} has been added successfully",
                         Status = true
                     };
                 }
                 return new Result()
                 {
-                    Message = $"The Role {roleName} hase not been added",
+                    Message = $"The Role {roleName} has not been added",
                     Status = false
                 };
             }
@@ -75,7 +75,7 @@ namespace LLS.DAL.Repositories
             };
         }
 
-        public async Task<Result> AddUserToRole(string roleName, string email)
+        public async Task<Result> AddUserToRole(Guid idd, string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
@@ -87,9 +87,8 @@ namespace LLS.DAL.Repositories
                 };
             }
 
-            var roleExist = await _roleManager.RoleExistsAsync(roleName);
-
-            if (!roleExist)
+            var roleExist = await _roleManager.FindByIdAsync(idd.ToString());
+            if (roleExist == null)
             {
                 return new Result()
                 {
@@ -97,22 +96,24 @@ namespace LLS.DAL.Repositories
                     Status = false
                 };
             }
+
+            var roleName = roleExist.Name;
             var userRoles = await _userManager.GetRolesAsync(user);
-            foreach (var userRole in userRoles)
+
+            if (userRoles.Count == 1)
             {
-                if (userRole.ToLower() == roleName.ToLower())
+                if (userRoles[0].ToLower() == roleName.ToLower())
                 {
                     return new Result()
                     {
                         Message = "User already got this role",
                         Status = false
                     };
+                } 
+                else
+                {
+                    await _userManager.RemoveFromRoleAsync(user, userRoles[0].ToLower());
                 }
-            }
-
-            if (userRoles.Count() == 2)
-            {
-                await _userManager.RemoveFromRoleAsync(user, userRoles[1].ToString());
             }
 
             var result = await _userManager.AddToRoleAsync(user, roleName);
@@ -165,15 +166,8 @@ namespace LLS.DAL.Repositories
                 Status = true
             };
         }
-        public async Task<Result> RemoveRoleFromUser(string email, string roleName)
+        public async Task<Result> RemoveRoleFromUser(Guid idd, string email)
         {
-            if (roleName.ToLower() == "user")
-                return new Result()
-                {
-                    Message = "Invalid Operation",
-                    Status = false
-                };
-
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
@@ -184,8 +178,8 @@ namespace LLS.DAL.Repositories
                 };
             }
 
-            var roleExist = await _roleManager.RoleExistsAsync(roleName);
-            if (!roleExist)
+            var roleExist = await _roleManager.FindByIdAsync(idd.ToString());
+            if (roleExist == null)
             {
                 return new Result()
                 {
@@ -194,6 +188,7 @@ namespace LLS.DAL.Repositories
                 };
             }
 
+            var roleName = roleExist.Name;
             var userRoles = await _userManager.GetRolesAsync(user);
 
             if (userRoles.Count() == 1 && roleName.ToLower() != userRoles[0].ToLower())
@@ -235,17 +230,10 @@ namespace LLS.DAL.Repositories
                 Status = true
             };
         }
-        public async Task<Result> DeleteRole(string roleName)
+        public async Task<Result> DeleteRole(Guid idd)
         {
-            if (roleName.ToLower() == "user")
-                return new Result()
-                {
-                    Message = "Invalid Operation",
-                    Status = false
-                };
-
-            var roleExist = await _roleManager.RoleExistsAsync(roleName);
-            if (!roleExist)
+            var role = await _roleManager.FindByIdAsync(idd.ToString());
+            if (role == null)
             {
                 return new Result()
                 {
@@ -254,7 +242,7 @@ namespace LLS.DAL.Repositories
                 };
             }
 
-            var role = await _roleManager.FindByNameAsync(roleName);
+            var roleName = role.Name;
 
             var result = await _roleManager.DeleteAsync(role);
             if (!result.Succeeded)

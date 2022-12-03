@@ -5,12 +5,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.HttpSys;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LLS.API.Controllers
 {
+    
     public class CourseController : BaseController
     {
         private readonly ICourseService _courseService;
@@ -19,6 +21,8 @@ namespace LLS.API.Controllers
             _courseService = courseService;
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Course")]
         [HttpPost("Create")]
         public async Task<IActionResult> CreateCourse(CourseDto courseDto)
         {
@@ -29,6 +33,8 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+        Policy = "AddDeleteEdit_Course")]
         [HttpDelete("Delete")]
         public async Task<IActionResult> DeleteCourse(Guid idd)
         {
@@ -38,7 +44,6 @@ namespace LLS.API.Controllers
         }
 
 
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "test")]
         [HttpGet]
         public async Task<IActionResult> GetListOfCourses()
         {
@@ -55,6 +60,8 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Course")]
         [HttpPut("{idd}/Update")]
         public async Task<IActionResult> UpdateCourseByName(Guid idd, CourseDto courseDto)
         {
@@ -97,6 +104,8 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AssignUserToCourse")]
         [HttpPost("{idd}/Assign-Teacher")]
         public async Task<IActionResult> AssignTeacherToCourse(Guid userIdd, Guid courseIdd)
         {
@@ -105,6 +114,8 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AssignUserToCourse")]
         [HttpPost("{idd}/Assign-Students")]
         public async Task<IActionResult> AssignStudentToCourse(List<Guid> userIdds, Guid idd)
         {
@@ -121,6 +132,8 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AssignUserToCourse")]
         [HttpPost("{idd}/Assign-User")]
         public async Task<IActionResult> AssignUserToCourse(Guid userIdd, Guid idd, string role)
         {
@@ -129,6 +142,8 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AssignExpToCourse")]
         [HttpPost("{idd}/Assign-Experiment")]
         public async Task<IActionResult> AssignExpToCourse(Guid idd, AssignExpDto assignExpDto)
         {

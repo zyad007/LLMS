@@ -15,5 +15,6 @@ namespace LLS.Common.Dto.Logins
         public string RefreshToken { get; set; }
         public bool Status { get; set; }
         public object Error { get; set; }
+        public List<string> Permissions { get; set; }
     }
 }
