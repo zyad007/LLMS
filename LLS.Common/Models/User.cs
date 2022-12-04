@@ -17,6 +17,9 @@ namespace LLS.Common.Models
         public string Country { get; set; }
         public string Role { get; set; } = "user";
         public string AcademicYear { get; set; }
+        public string City { get; set; }
+        public string Gender { get; set; }
+
 
         //Assigned Courses for Student
         public List<User_Course> User_Courses { get; set; }

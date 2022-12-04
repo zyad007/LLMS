@@ -139,7 +139,8 @@ namespace LLS.API
 
             services.AddIdentity<IdentityUser, IdentityRole>(options
                                 => options.SignIn.RequireConfirmedAccount = true)
-              .AddEntityFrameworkStores<AppDbContext>();
+              .AddEntityFrameworkStores<AppDbContext>()
+              .AddDefaultTokenProviders();
 
             services.Configure<IdentityOptions>(options =>
             {

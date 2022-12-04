@@ -20,5 +20,9 @@ namespace LLS.Common.Dto
         public Guid CourseIdd { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public DateTime UpdateDate { get; set; }
+
+        //Recourse
+        public List<ResourceDto> Resources { get; set; }
     }
 }

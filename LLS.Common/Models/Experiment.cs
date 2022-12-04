@@ -11,9 +11,6 @@ namespace LLS.Common.Models
         public string Name { get; set; }
         public Guid Idd { get; set; } = Guid.NewGuid();
 
-
-        // list of recources
-
         // to be deleted and recreated when jwt is active
         public string AuthorId { get; set; }
         public string AuthorName { get; set; }
@@ -26,6 +23,9 @@ namespace LLS.Common.Models
 
         //Assigned Courses for this Expirment
         public List<Exp_Course> Exp_Courses { get; set; }
+        public bool Active { get; set; } = true; //Indecates if the Exp is a Copy{False} in Course or Pure{True} Exp
 
+        //Recourse
+        public List<Resource_Exp> Resource_Exps { get; set; }
     }
 }

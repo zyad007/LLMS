@@ -14,11 +14,14 @@ namespace LLS.API.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IUserService _userService;
         public AccountController(IAccountService accountService,
-                                      RoleManager<IdentityRole> roleManager)
+                                      RoleManager<IdentityRole> roleManager,
+                                      IUserService userService)
         {
             _accountService = accountService;
             _roleManager = roleManager;
+            _userService = userService;
         }
 
         [HttpPost("Login")]
@@ -56,6 +59,43 @@ namespace LLS.API.Controllers
             );
         }
 
+
+        [HttpPost("Confirm")]
+        public async Task<IActionResult> ConfirmAPI(ConfirmUser confirm)
+        {
+            if (ModelState.IsValid)
+            {
+                var authRes = await _userService.ConfirmAccount(confirm.email, confirm.password, confirm.token);
+
+                if (!authRes.Status)
+                {
+                    return BadRequest(authRes);
+                }
+
+                var role = await _roleManager.FindByNameAsync(authRes.Role);
+                if (role != null)
+                {
+                    var result = await _roleManager.GetClaimsAsync(role);
+                    if (result != null)
+                    {
+                        var perms = result.Select(x => x.Value).ToList();
+
+                        authRes.Permissions = perms;
+                    }
+                }
+
+                return CheckResult(AuthToRes(authRes));
+            }
+
+            return BadRequest(new Result()
+            {
+                Message = "Invaild Payload",
+                Status = false
+            }
+            );
+        }
+
+
         [HttpPost("RefreshToken")]
         public async Task<IActionResult> RefreshToken(TokenRequest tokenRequest)
         {
@@ -91,5 +131,12 @@ namespace LLS.API.Controllers
                 Status = authResult.Status
             };
         }
+    }
+
+    public class ConfirmUser
+    {
+        public string email { get; set; }
+        public string password { get; set; }
+        public string token { get; set; }
     }
 }

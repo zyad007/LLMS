@@ -7,12 +7,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static LLS.BLL.Services.UserService;
 
 namespace LLS.BLL.IServices
 {
     public interface IUserService
     {
         Task<Result> AddUser(SignUp signUp);
+        Task<Result> RegisterUserWithConfirmToken(RegisterUser user, string role);
+        Task<AuthResult> ConfirmAccount(string email, string password, string token);
         Task<Result> UpdateUser(UserDto userDto);
         Task<Result> DeleteUser(Guid userIdd);
         Task<Result> GetUserByEmail(string email);

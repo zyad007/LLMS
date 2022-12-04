@@ -21,6 +21,11 @@ namespace LLS.DAL.Repositories
             return await _set.FirstOrDefaultAsync(x => x.Idd == idd);
         }
 
+        public async Task<List<Experiment>> GetAllExps()
+        {
+            return await _set.Where(x => x.Active == true).ToListAsync();
+        }
+
         public async Task Update(Experiment exp)
         {
             var res = await _set.FirstOrDefaultAsync(x=>x.Idd == exp.Idd);

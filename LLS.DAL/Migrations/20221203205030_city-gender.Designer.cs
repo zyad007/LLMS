@@ -3,15 +3,17 @@ using System;
 using LLS.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace LLS.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221203205030_city-gender")]
+    partial class citygender
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,9 +97,6 @@ namespace LLS.DAL.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("Active")
-                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("AddedDate")
                         .HasColumnType("timestamp without time zone");
@@ -197,7 +196,7 @@ namespace LLS.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Resources");
+                    b.ToTable("Resource");
                 });
 
             modelBuilder.Entity("LLS.Common.Models.Resource_Exp", b =>
@@ -206,7 +205,7 @@ namespace LLS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ExperimentId")
+                    b.Property<Guid>("Exp_CourseId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("ResourceId")
@@ -214,11 +213,11 @@ namespace LLS.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ExperimentId");
+                    b.HasIndex("Exp_CourseId");
 
                     b.HasIndex("ResourceId");
 
-                    b.ToTable("Resource_Exps");
+                    b.ToTable("Resource_Exp");
                 });
 
             modelBuilder.Entity("LLS.Common.Models.Resource_Machine", b =>
@@ -621,9 +620,9 @@ namespace LLS.DAL.Migrations
 
             modelBuilder.Entity("LLS.Common.Models.Resource_Exp", b =>
                 {
-                    b.HasOne("LLS.Common.Models.Experiment", "Experiment")
-                        .WithMany("Resource_Exps")
-                        .HasForeignKey("ExperimentId")
+                    b.HasOne("LLS.Common.Models.Exp_Course", "Exp_Course")
+                        .WithMany()
+                        .HasForeignKey("Exp_CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -633,7 +632,7 @@ namespace LLS.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Experiment");
+                    b.Navigation("Exp_Course");
 
                     b.Navigation("Resource");
                 });
@@ -647,7 +646,7 @@ namespace LLS.DAL.Migrations
                         .IsRequired();
 
                     b.HasOne("LLS.Common.Models.Resource", "Resource")
-                        .WithMany()
+                        .WithMany("resource_machines")
                         .HasForeignKey("ResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -797,8 +796,6 @@ namespace LLS.DAL.Migrations
             modelBuilder.Entity("LLS.Common.Models.Experiment", b =>
                 {
                     b.Navigation("Exp_Courses");
-
-                    b.Navigation("Resource_Exps");
                 });
 
             modelBuilder.Entity("LLS.Common.Models.Machine", b =>
@@ -809,6 +806,8 @@ namespace LLS.DAL.Migrations
             modelBuilder.Entity("LLS.Common.Models.Resource", b =>
                 {
                     b.Navigation("Resource_Exps");
+
+                    b.Navigation("resource_machines");
                 });
 
             modelBuilder.Entity("LLS.Common.Models.StudentCourse_ExpCourse", b =>

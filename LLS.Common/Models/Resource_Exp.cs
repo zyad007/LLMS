@@ -7,9 +7,9 @@ namespace LLS.Common.Models
     {
         public Guid Id { get; set; }
 
-        public Guid Exp_CourseId { get; set; }
-        [ForeignKey(nameof(Exp_CourseId))]
-        public Exp_Course Exp_Course { get; set; }
+        public Guid ExperimentId { get; set; }
+        [ForeignKey(nameof(ExperimentId))]
+        public Experiment Experiment { get; set; }
 
         public Guid ResourceId { get; set; }
         [ForeignKey(nameof(ResourceId))]

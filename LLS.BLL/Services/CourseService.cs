@@ -294,6 +294,8 @@ namespace LLS.BLL.Services
                     Message = "Expirment doesn't exists or it already "
                 };
 
+
+            //Allow add same exp with copy or only allow 1 exp with no Origin
             var check = await _context.Exp_Courses.FirstOrDefaultAsync(x => x.CourseId == course.Id && x.Experiment.Id == exp.Id);
             if (check != null)
             {

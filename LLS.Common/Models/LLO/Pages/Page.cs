@@ -1,4 +1,5 @@
-﻿using LLS.Common.Models.LLO.Pages.Blocks;
+﻿using LLS.Common.Dto;
+using LLS.Common.Models.LLO.Pages.Blocks;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -24,7 +25,7 @@ namespace LLS.Common.Models.LLO.Pages
         public bool active { get; set; }
         public string layout { get; set; }
         public bool showScreenShotButton { get; set; }
-        public List<Resource> resources { get; set; }
+        public List<ResourceDto> resources { get; set; }
     }
 
     public class config

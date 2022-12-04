@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LLS.Common.Dto.Logins;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,23 @@ namespace LLS.Common.Transfere_Layer_Object
         public object Message { get; set; }
         public bool Status { get; set; }
         public DateTime ResponceTime { get; set; } = DateTime.Now;
+
+        public static Result AuthToRes(AuthResult authResult)
+        {
+            return new Result()
+            {
+                Data = new
+                {
+                    authResult.Token,
+                    authResult.RefreshToken,
+                    authResult.Email,
+                    authResult.Role,
+                    authResult.Idd,
+                    authResult.Permissions
+                },
+                Message = authResult.Error,
+                Status = authResult.Status
+            };
+        }
     }
 }

@@ -288,6 +288,10 @@ namespace LLS.DAL.Repositories
                 user.Email = newUser.Email;
                 user.Country = newUser.Country;
                 user.PhoneNumber = newUser.PhoneNumber;
+                user.Gender = newUser.Gender;
+                user.AcademicYear = newUser.AcademicYear;
+                user.City = newUser.City;
+
                 user.Role = newUser.Role;
 
                 user.UpdateDate = DateTime.UtcNow;

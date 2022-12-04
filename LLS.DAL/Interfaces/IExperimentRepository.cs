@@ -10,6 +10,7 @@ namespace LLS.DAL.Interfaces
     public interface IExperimentRepository : IRepository<Experiment>
     {
         Task<Experiment> GetByIdd(Guid idd);
+        Task<List<Experiment>> GetAllExps();
         Task Update(Experiment exp);
     }
 }

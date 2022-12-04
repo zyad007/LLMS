@@ -35,6 +35,10 @@ namespace LLS.DAL.Repositories
             res.Lastname = user.Lastname;
             res.PhoneNumber = user.PhoneNumber;
             res.Country = user.Country;
+            res.AcademicYear = user.AcademicYear;
+            res.City = user.City;
+            res.Gender = user.Gender;
+            res.Role = user.Role;
 
             res.UpdateDate = DateTime.Now;
         }

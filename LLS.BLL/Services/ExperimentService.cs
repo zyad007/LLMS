@@ -4,6 +4,7 @@ using LLS.Common.Dto;
 using LLS.Common.Models;
 using LLS.Common.Models.LLO;
 using LLS.Common.Transfere_Layer_Object;
+using LLS.DAL.Data;
 using LLS.DAL.Interfaces;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -21,11 +22,14 @@ namespace LLS.BLL.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _iMapper;
+        private readonly AppDbContext _context;
         public ExperimentService(IUnitOfWork unitOfWork,
-            IMapper iMapper)
+            IMapper iMapper,
+            AppDbContext context)
         {
             _unitOfWork = unitOfWork;
             _iMapper = iMapper;
+            _context = context;
         }
 
         public async Task<Result> CreateExp(ExpDto expDto)
@@ -96,7 +100,7 @@ namespace LLS.BLL.Services
 
         public async Task<Result> GetAllExp()
         {
-            var exps = await _unitOfWork.Experiments.GetAll();
+            var exps = await _unitOfWork.Experiments.GetAllExps();
             var expsDto = new List<ExpDto>();
 
             foreach (var exp in exps)
@@ -230,6 +234,87 @@ namespace LLS.BLL.Services
             };
         }
 
+        public async Task<Result> AddRecources(List<ResourceDto> resourceDtos, Guid idd)
+        {
+            var exp = await _unitOfWork.Experiments.GetByIdd(idd);
+            if (exp == null)
+            {
+                return new Result()
+                {
+                    Status = false,
+                    Message = "There is no Experiment with that IDD"
+                };
+            }
+
+            foreach(var res in resourceDtos)
+            {
+                var resDb = _context.Resources.FirstOrDefault(x=> x.Id == res.Id);
+                if(resDb == null)
+                {
+                    return new Result()
+                    {
+                        Status = false,
+                        Message = "no recource with this Id"
+                    };
+                }
+
+                var res_exp = new Resource_Exp()
+                {
+                    ExperimentId = exp.Id,
+                    Experiment = exp,
+                    ResourceId = resDb.Id,
+                    Resource = resDb
+                };
+
+                await _context.Resource_Exps.AddAsync(res_exp);
+            }
+
+            await _unitOfWork.SaveAsync();
+
+            return new Result()
+            {
+                Status = true,
+                Message = "resources added succesfully"
+            };
+        }
+
+        public async Task<Result> RemoveRecource(Guid idd, ResourceDto resourceDto)
+        {
+            var exp = await _unitOfWork.Experiments.GetByIdd(idd);
+            if (exp == null)
+            {
+                return new Result()
+                {
+                    Status = false,
+                    Message = "There is no Experiment with that IDD"
+                };
+            }
+
+            var resDb = _context.Resources.FirstOrDefault(x => x.Id == resourceDto.Id);
+            if (resDb == null)
+            {
+                return new Result()
+                {
+                    Status = false,
+                    Message = "no recource with this Id"
+                };
+            }
+
+            var res_exp = _context.Resource_Exps.FirstOrDefault(x => x.ResourceId == resDb.Id
+                                                                    && x.ExperimentId == idd);
+
+            _context.Resource_Exps.Remove(res_exp);
+
+            await _unitOfWork.SaveAsync();
+
+            return new Result()
+            {
+                Status = true,
+                Message = "recource removed successfully"
+            };
+
+        }
+
         private void FetchDtoIntoLLO(Experiment exp, LLO llo)
         {
             //exp.LLO_MA = JsonConvert.SerializeObject(expDto.LLO, Formatting.None,
@@ -253,6 +338,8 @@ namespace LLS.BLL.Services
                                             NullValueHandling = NullValueHandling.Ignore
                                         });
         }
+
+
 
 
         public class IgnorePropertiesResolver : DefaultContractResolver

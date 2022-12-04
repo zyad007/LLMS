@@ -60,16 +60,26 @@ namespace LLS.DAL.Data
                 .WithMany(x => x.Trials)
                 .HasForeignKey(x => x.Student_ExpCourseId);
 
-            // Resource_Machine
-            builder.Entity<Resource_Machine>()
+            //// Resource_Machine
+            //builder.Entity<Resource_Machine>()
+            //    .HasOne(b => b.Resource)
+            //    .WithMany(ba => ba.resource_machines)
+            //    .HasForeignKey(bi => bi.ResourceId);
+
+            //builder.Entity<Resource_Machine>()
+            //    .HasOne(b => b.Machine)
+            //    .WithMany(ba => ba.resource_machines)
+            //    .HasForeignKey(bi => bi.MachineId);
+
+            builder.Entity<Resource_Exp>()
                 .HasOne(b => b.Resource)
-                .WithMany(ba => ba.resource_machines)
+                .WithMany(ba => ba.Resource_Exps)
                 .HasForeignKey(bi => bi.ResourceId);
 
-            builder.Entity<Resource_Machine>()
-                .HasOne(b => b.Machine)
-                .WithMany(ba => ba.resource_machines)
-                .HasForeignKey(bi => bi.MachineId);
+            builder.Entity<Resource_Exp>()
+                .HasOne(b => b.Experiment)
+                .WithMany(ba => ba.Resource_Exps)
+                .HasForeignKey(bi => bi.ExperimentId);
 
 
 
@@ -86,7 +96,7 @@ namespace LLS.DAL.Data
 
         //public DbSet<Machine> Machines { get; set; }
 
-        //public DbSet<Resource> Resources { get; set; }
+        public DbSet<Resource> Resources { get; set; }
 
         public DbSet<StudentSession> StudentSessions { get; set; }
 
@@ -96,7 +106,7 @@ namespace LLS.DAL.Data
         public DbSet<StudentCourse_ExpCourse> StudentCourse_ExpCourses { get; set; }
         //public DbSet<Resource_Machine> Resource_Machines { get; set; }
         public DbSet<Student_Trial> Trials { get; set; }
-        //public DbSet<Resource_Exp> Resource_Exps { get; set; }
+        public DbSet<Resource_Exp> Resource_Exps { get; set; }
 
 
     }

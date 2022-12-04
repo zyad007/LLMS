@@ -20,15 +20,18 @@ namespace LLS.BLL.Services
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IMapper _iMapper;
+        private readonly IAccountService _accountService;
         public UserService(IUnitOfWork unitOfWork,
             UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IMapper iMapper)
+            IMapper iMapper,
+            IAccountService accountService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _roleManager = roleManager;
             _iMapper = iMapper;
+            _accountService = accountService;
         }
 
         public async Task<Result> AddUser(SignUp signUp)
@@ -114,15 +117,20 @@ namespace LLS.BLL.Services
                 Data = _iMapper.Map<UserDto>(user)
             };
         }
-
-        public async Task<string> RegisterUser1(RegisterUser user)
+        
+        public async Task<Result> RegisterUserWithConfirmToken(RegisterUser user, string role)
         {
             //Check if Email already Exisit
             var userExist = await _unitOfWork.Users.GetByEmail(user.Email);
 
             if (userExist != null) //Email exists
             {
-                return $"[{user.Email}]: Email already in use";
+                return new Result()
+                {
+                    Data = new {email = user.Email},
+                    Message = $"[{user.Email}]: Email already in use",
+                    Status = false
+                };
             }
 
             //Add the user
@@ -130,24 +138,33 @@ namespace LLS.BLL.Services
             {
                 Email = user.Email,
                 UserName = user.Email,
-                EmailConfirmed = false //To Update to confirm email
+                EmailConfirmed = false 
             };
 
-            var isCreated = await _userManager.CreateAsync(newUser, "R00t@R00t");
+            var isCreated = await _userManager.CreateAsync(newUser);
             if (!isCreated.Succeeded)
             {
-                return $"[{user.Email}]: some thing went wrong";
+                return new Result()
+                {
+                    Data = new { email = user.Email },
+                    Message = $"[{user.Email}]: {isCreated.Errors.FirstOrDefault().Description}",
+                    Status = false
+                };
             }
 
             //Add user to Db
             var userDb = new User();
             userDb.IdentityId = new Guid(newUser.Id);
-            userDb.FirstName = user.firstName;
-            userDb.Lastname = user.lastName;
-            userDb.Country = user.country;
-            userDb.PhoneNumber = user.phoneNumber;
-            userDb.AcademicYear = user.academicYear;
+            userDb.FirstName = user.FirstName;
+            userDb.Lastname = user.LastName;
+            userDb.Country = user.Country;
+            userDb.PhoneNumber = user.PhoneNumber;
+            userDb.AcademicYear = user.AcademicYear;
+            userDb.Gender = user.Gender;
+            userDb.City = user.City;
             userDb.Email = user.Email;
+            var exist = await _roleManager.FindByNameAsync(role);
+            if (exist != null) userDb.Role = role;
 
             var result = await _unitOfWork.Users.Create(userDb);
 
@@ -161,12 +178,61 @@ namespace LLS.BLL.Services
             //Add Role to User
             //var roleResult = await _unitOfWork.Roles.AddUserToRole("user", userDb.Email);
 
+            var idUser = await _userManager.FindByEmailAsync(userDb.Email);
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(idUser);
+
+            var exists = await _roleManager.FindByNameAsync(role);
+            if(exists != null) await _userManager.AddToRoleAsync(idUser, role);
+
+
             await _unitOfWork.SaveAsync();
 
             //Send Confimation Email to set password
 
 
-            return $"[{user.Email}]: Added successfully";
+            return new Result { 
+                Message = $"[{user.Email}]: Added successfully" ,
+                Data = new {email = user.Email, token = token},
+                Status = true
+            };
+        }
+
+        public async Task<AuthResult> ConfirmAccount(string email, string password, string token)
+        {
+            var idUser = await _userManager.FindByEmailAsync(email);
+            if (idUser == null)
+            {
+                return new AuthResult()
+                {
+                    Status = false,
+                    Error = "User doesn't exist"
+                };
+            }
+
+            var isConfirmed = await _userManager.ConfirmEmailAsync(idUser,token);
+            if(!isConfirmed.Succeeded)
+            {
+                return new AuthResult()
+                {
+                    Status = false,
+                    Error = isConfirmed.Errors.Select(x => x.Description).ToList()
+                };
+            }
+            
+            var isSetPassword = await _userManager.AddPasswordAsync(idUser, password);
+            if (!isSetPassword.Succeeded)
+            {
+                return new AuthResult()
+                {
+                    Status = false,
+                    Error = isSetPassword.Errors.Select(x => x.Description).ToList()
+                };
+            }
+
+            await _unitOfWork.SaveAsync();
+
+            return await _accountService.Login(new Login { Email = email, Password = password });
         }
 
         public async Task<Result> GetAllUsers()
@@ -264,7 +330,22 @@ namespace LLS.BLL.Services
                 };
             }
 
-            //userDto.Role = null;
+            if(user.Role != userDto.Role)
+            {
+                var role = await _roleManager.FindByNameAsync(userDto.Role);
+                if(role == null)
+                {
+                    return new Result()
+                    {
+                        Status = false,
+                        Message = "no role with this name"
+                    };
+                }
+
+                var idUser = await _userManager.FindByEmailAsync(user.Email);
+                await _userManager.RemoveFromRoleAsync(idUser, user.Role);
+                await _userManager.AddToRoleAsync(idUser, userDto.Role);
+            }
 
             var newUser = _iMapper.Map<User>(userDto);
 
@@ -312,11 +393,13 @@ namespace LLS.BLL.Services
         public class RegisterUser
         {
             public string Email { get; set; }
-            public string firstName { get; set; }
-            public string lastName { get; set; }
-            public string country { get; set; }
-            public string phoneNumber { get; set; }
-            public string academicYear { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public string Country { get; set; }
+            public string PhoneNumber { get; set; }
+            public string AcademicYear { get; set; }
+            public string City { get; set; }
+            public string Gender { get; set; }
         }
     }
 }

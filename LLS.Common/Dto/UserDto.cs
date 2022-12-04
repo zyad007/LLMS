@@ -16,5 +16,7 @@ namespace LLS.Common.Dto
         public string Country { get; set; }
         public string Role { get; set; }
         public string AcademicYear { get; set; }
+        public string City { get; set; }
+        public string Gender { get; set; }
     }
 }

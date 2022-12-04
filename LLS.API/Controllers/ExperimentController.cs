@@ -5,9 +5,11 @@ using LLS.Common.Models.LLO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LLS.API.Controllers
@@ -15,9 +17,12 @@ namespace LLS.API.Controllers
     public class ExperimentController : BaseController
     {
         private readonly IExperimentService _experimentService;
-        public ExperimentController(IExperimentService experimentService)
+        private readonly UserManager<IdentityUser> _userManager;
+        public ExperimentController(IExperimentService experimentService
+                                    , UserManager<IdentityUser> userManager)
         {
             _experimentService = experimentService;
+            _userManager = userManager;
         }
 
 
@@ -40,6 +45,7 @@ namespace LLS.API.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> CreateExp([FromBody]CreateExp create) 
         {
+            //var loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
             var expDto = new ExpDto()
             {
                 Name = create.name,
@@ -86,7 +92,7 @@ namespace LLS.API.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "AddDeleteEdit_Exp")]
-        [HttpPut("/{idd}/Update")]
+        [HttpPut("{idd}/Update")]
         public async Task<IActionResult> UpdateExp(Guid idd,[FromBody]CreateExp expUpdate)
         {
             var expDto = new ExpDto()
@@ -100,7 +106,23 @@ namespace LLS.API.Controllers
         }
 
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Exp")]
+        [HttpPut("{idd}/Add-Resources")]
+        public async Task<IActionResult> AddResources(Guid idd, List<ResourceDto> res)
+        {
+            var result = await _experimentService.AddRecources(res, idd);
+            return CheckResult(result);
+        }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Exp")]
+        [HttpPut("{idd}/Remove-Resource")]
+        public async Task<IActionResult> RemoveResources(Guid idd, ResourceDto res)
+        {
+            var result = await _experimentService.RemoveRecource(idd, res);
+            return CheckResult(result);
+        }
     }
 
     public class CreateExp
