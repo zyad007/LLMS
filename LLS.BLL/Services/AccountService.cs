@@ -279,10 +279,8 @@ namespace LLS.BLL.Services
 
             var claims = new List<Claim>
             {
-                new Claim("Id", user.Id),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // id for Token used for refresh token
             };
 

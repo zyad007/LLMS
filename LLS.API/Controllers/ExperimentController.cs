@@ -47,7 +47,6 @@ namespace LLS.API.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> CreateExp([FromBody]CreateExp create) 
         {
-            //var loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
 
@@ -55,11 +54,10 @@ namespace LLS.API.Controllers
             {
                 Name = create.name,
                 Description = create.description,
-                AuthorId = userId,
                 AuthorName = userEmail,
                 Idd = Guid.NewGuid()
             };
-            var res = await _experimentService.CreateExp(expDto);
+            var res = await _experimentService.CreateExp(expDto, userId);
             return CheckResult(res);
         }
 
@@ -68,7 +66,8 @@ namespace LLS.API.Controllers
         [HttpPost("CreateLLO")]
         public async Task<IActionResult> CreateLLO(Guid idd, LLO llo)
         {
-            var res = await _experimentService.CreateLLO(idd, llo);
+            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var res = await _experimentService.CreateLLO(idd, llo, userId);
             return CheckResult(res);
         }
 
@@ -77,7 +76,9 @@ namespace LLS.API.Controllers
         [HttpPut("{idd}/EditLLO")]
         public async Task<IActionResult> EditLLO(Guid idd, LLO llo)
         {
-            var res = await _experimentService.CreateLLO(idd, llo);
+            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var res = await _experimentService.CreateLLO(idd, llo, userId);
+
             return CheckResult(res);
         }
 
@@ -102,19 +103,22 @@ namespace LLS.API.Controllers
         [HttpPut("{idd}/Update")]
         public async Task<IActionResult> UpdateExp(Guid idd,[FromBody]CreateExp expUpdate)
         {
+            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
             var expDto = new ExpDto()
             {
                 Idd = idd,
                 Name = expUpdate.name,
                 Description = expUpdate.description
             };
-            var res = await _experimentService.UpdateExp(expDto);
+
+            var res = await _experimentService.UpdateExp(expDto, new Guid(userId));
             return CheckResult(res);
         }
 
 
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
-        //    Policy = "AddDeleteEdit_Exp")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Exp")]
         [HttpPost("{idd}/Add-Resources")]
         public async Task<IActionResult> AddResources(Guid idd,[FromBody] List<Guid> resIdds)
         {
@@ -122,8 +126,8 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
-        //    Policy = "AddDeleteEdit_Exp")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Exp")]
         [HttpDelete("{idd}/Remove-Resource")]
         public async Task<IActionResult> RemoveResources(Guid idd, Guid resIdd)
         {

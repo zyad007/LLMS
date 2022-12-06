@@ -142,8 +142,8 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
-        //    Policy = "AssignExpToCourse")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AssignExpToCourse")]
         [HttpPost("{idd}/Assign-Experiment")]
         public async Task<IActionResult> AssignExpToCourse(Guid idd, AssignExpDto assignExpDto)
         {

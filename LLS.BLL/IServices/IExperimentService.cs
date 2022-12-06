@@ -11,10 +11,10 @@ namespace LLS.BLL.IServices
 {
     public interface IExperimentService
     {
-        Task<Result> CreateExp(ExpDto expDto);
-        Task<Result> CreateLLO(Guid expIdd, LLO llo);
+        Task<Result> CreateExp(ExpDto expDto, string userId);
+        Task<Result> CreateLLO(Guid expIdd, LLO llo, string userId);
         Task<Result> GetLLO(Guid expIdd);
-        Task<Result> UpdateExp(ExpDto expDto);
+        Task<Result> UpdateExp(ExpDto expDto, Guid userId);
         Task<Result> DeleteExp(Guid idd);
         Task<Result> GetExpByIdd(Guid idd);
         Task<Result> GetAllExp();

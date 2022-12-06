@@ -12,7 +12,6 @@ namespace LLS.Common.Dto
     {
         public Guid Idd { get; set; } = Guid.NewGuid();
         public string Name { get; set; }
-        public string AuthorId { get; set; }
         public string AuthorName { get; set; }
         public LLO LLO { get; set; }
         public string Description { get; set; }

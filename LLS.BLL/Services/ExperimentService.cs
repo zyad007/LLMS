@@ -33,7 +33,7 @@ namespace LLS.BLL.Services
             _context = context;
         }
 
-        public async Task<Result> CreateExp(ExpDto expDto)
+        public async Task<Result> CreateExp(ExpDto expDto, string userId)
         {
             //var exist = await _unitOfWork.Experiments.GetByIdd(expDto.Idd);
             //if(exist != null)
@@ -54,7 +54,7 @@ namespace LLS.BLL.Services
                 Name = expDto.Name,
                 Description = expDto.Description,
                 Idd = expDto.Idd,
-                AuthorId = expDto.AuthorId,
+                AuthorId = userId,
                 AuthorName = expDto.AuthorName
             };
 
@@ -154,10 +154,10 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> UpdateExp(ExpDto expDto)
+        public async Task<Result> UpdateExp(ExpDto expDto, Guid userId)
         {
-            var exist = await _unitOfWork.Experiments.GetByIdd(expDto.Idd);
-            if (exist == null)
+            var exp = await _unitOfWork.Experiments.GetByIdd(expDto.Idd);
+            if (exp == null)
             {
                 return new Result()
                 {
@@ -166,22 +166,61 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var exp = _iMapper.Map<Experiment>(expDto);
-
-            //FetchDtoIntoLLO(exp, expDto.LLO);
-
-            await _unitOfWork.Experiments.Update(exp);
-            await _unitOfWork.SaveAsync();
-
-            return new Result()
+            if(exp.AuthorId != userId.ToString())
             {
-                Status = true,
-                Message = "Updated Successfully",
-                Data = expDto
-            };
+                var expCopy = exp;
+                expCopy.Name = expDto.Name;
+                expCopy.Description = expDto.Description;
+                expCopy.Id = Guid.NewGuid();
+                expCopy.Idd = Guid.NewGuid();
+                expCopy.AddedDate = DateTime.Now;
+                expCopy.UpdateDate = DateTime.Now;
+                expCopy.Active = false;
+
+                await _unitOfWork.Experiments.Create(expCopy);
+
+                var exp_ress = await _context.Resource_Exps.Where(x => x.ExperimentId == exp.Id).ToListAsync();
+                foreach (var exp_resTemp in exp_ress)
+                {
+                    var exp_res = new Resource_Exp()
+                    {
+                        ExperimentId = expCopy.Id,
+                        Experiment = expCopy,
+                        Resource = exp_resTemp.Resource,
+                        ResourceId = exp_resTemp.ResourceId
+                    };
+
+                    await _context.Resource_Exps.AddAsync(exp_res);
+                }
+
+                var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+                expCopy.AuthorName = user.Email;
+
+                await _unitOfWork.SaveAsync();
+
+                return new Result()
+                {
+                    Status = true,
+                    Message = "A new Copy Added Successfully"
+                };
+            }
+            else
+            {
+                var ex = _iMapper.Map<Experiment>(expDto);
+
+                await _unitOfWork.Experiments.Update(ex);
+                await _unitOfWork.SaveAsync();
+
+                return new Result()
+                {
+                    Status = true,
+                    Message = "Updated Successfully"
+                };
+            }
+
         }
 
-        public async Task<Result> CreateLLO(Guid expIdd,LLO llo)
+        public async Task<Result> CreateLLO(Guid expIdd,LLO llo, string userId)
         {
             var exp = await _unitOfWork.Experiments.GetByIdd(expIdd);
             if (exp == null)
@@ -190,6 +229,15 @@ namespace LLS.BLL.Services
                 {
                     Status = false,
                     Message = "There is no Experiment with that IDD"
+                };
+            }
+
+            if(exp.AuthorId != userId)
+            {
+                return new Result()
+                {
+                    Status = false,
+                    Message = "The user is not the Original User"
                 };
             }
 

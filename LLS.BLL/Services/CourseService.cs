@@ -305,6 +305,20 @@ namespace LLS.BLL.Services
 
             await _unitOfWork.Experiments.Create(expCopy);
 
+            var exp_ress = await _context.Resource_Exps.Where(x => x.ExperimentId == exp.Id).ToListAsync();
+            foreach(var exp_resTemp in exp_ress)
+            {
+                var exp_res = new Resource_Exp()
+                {
+                    ExperimentId = expCopy.Id,
+                    Experiment = expCopy,
+                    Resource = exp_resTemp.Resource,
+                    ResourceId = exp_resTemp.ResourceId
+                };
+
+                await _context.Resource_Exps.AddAsync(exp_res);
+            }
+
             //var check = await _context.Exp_Courses.FirstOrDefaultAsync(x => x.CourseId == course.Id && x.Experiment.Id == exp.Id);
             //if (check != null)
             //{
@@ -385,7 +399,6 @@ namespace LLS.BLL.Services
                         Name = x.Experiment.Name,
                         Idd = x.Experiment.Idd,
                         AuthorName = x.Experiment.AuthorName,
-                        AuthorId = x.Experiment.AuthorId,
                         Description = x.Experiment.Description,
                         StartDate = x.StartDate,
                         EndDate = x.EndDate,
