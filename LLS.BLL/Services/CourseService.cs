@@ -296,20 +296,29 @@ namespace LLS.BLL.Services
 
 
             //Allow add same exp with copy or only allow 1 exp with no Origin
-            var check = await _context.Exp_Courses.FirstOrDefaultAsync(x => x.CourseId == course.Id && x.Experiment.Id == exp.Id);
-            if (check != null)
-            {
-                return new Result()
-                {
-                    Status = false,
-                    Message = "This Expirment is already assigned to the course"
-                };
-            }
+            var expCopy = exp;
+            expCopy.Id = Guid.NewGuid();
+            expCopy.Idd = Guid.NewGuid();
+            expCopy.AddedDate = DateTime.Now;
+            expCopy.UpdateDate = DateTime.Now;
+            expCopy.Active = false;
+
+            await _unitOfWork.Experiments.Create(expCopy);
+
+            //var check = await _context.Exp_Courses.FirstOrDefaultAsync(x => x.CourseId == course.Id && x.Experiment.Id == exp.Id);
+            //if (check != null)
+            //{
+            //    return new Result()
+            //    {
+            //        Status = false,
+            //        Message = "This Experiment is already assigned to the course"
+            //    };
+            //}
 
             var exp_Course = new Exp_Course()
             {
-                ExperimentId = exp.Id,
-                Experiment = exp,
+                ExperimentId = expCopy.Id,
+                Experiment = expCopy,
                 CourseId = course.Id,
                 Course = course,
                 StartDate = startDate,
@@ -380,6 +389,9 @@ namespace LLS.BLL.Services
                         Description = x.Experiment.Description,
                         StartDate = x.StartDate,
                         EndDate = x.EndDate,
+                        UpdateDate = x.Experiment.UpdateDate,
+                        CourseIdd = course.Idd,
+                        CourseName = course.Name
                     })
                     .ToListAsync();
            

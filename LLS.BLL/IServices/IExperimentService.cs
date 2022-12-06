@@ -18,8 +18,8 @@ namespace LLS.BLL.IServices
         Task<Result> DeleteExp(Guid idd);
         Task<Result> GetExpByIdd(Guid idd);
         Task<Result> GetAllExp();
-        Task<Result> AddRecources(List<ResourceDto> resourceDtos, Guid idd);
-        Task<Result> RemoveRecource(Guid idd, ResourceDto resourceDto);
-
+        Task<Result> AddRecources(List<Guid> resIdds, Guid idd);
+        Task<Result> RemoveRecource(Guid idd, Guid resIdd);
+        Task<Result> GetResource(Guid idd);
     }
 }

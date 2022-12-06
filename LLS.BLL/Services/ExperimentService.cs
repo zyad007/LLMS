@@ -6,6 +6,7 @@ using LLS.Common.Models.LLO;
 using LLS.Common.Transfere_Layer_Object;
 using LLS.DAL.Data;
 using LLS.DAL.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
@@ -53,7 +54,8 @@ namespace LLS.BLL.Services
                 Name = expDto.Name,
                 Description = expDto.Description,
                 Idd = expDto.Idd,
-                //AuthorName = To do 
+                AuthorId = expDto.AuthorId,
+                AuthorName = expDto.AuthorName
             };
 
             var result = await _unitOfWork.Experiments.Create(exp);
@@ -191,6 +193,15 @@ namespace LLS.BLL.Services
                 };
             }
 
+            if(exp.Editable == false)
+            {
+                return new Result()
+                {
+                    Status = false,
+                    Message = "This Experiment is not editable because it's in live progress for student"
+                };
+            }
+
             FetchDtoIntoLLO(exp, llo);
 
             await _unitOfWork.Experiments.Update(exp);
@@ -234,7 +245,7 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> AddRecources(List<ResourceDto> resourceDtos, Guid idd)
+        public async Task<Result> AddRecources(List<Guid> resIdds, Guid idd)
         {
             var exp = await _unitOfWork.Experiments.GetByIdd(idd);
             if (exp == null)
@@ -246,15 +257,26 @@ namespace LLS.BLL.Services
                 };
             }
 
-            foreach(var res in resourceDtos)
+            foreach(var resIdd in resIdds)
             {
-                var resDb = _context.Resources.FirstOrDefault(x=> x.Id == res.Id);
+                var resDb = _context.Resources.FirstOrDefault(x=> x.Id == resIdd);
                 if(resDb == null)
                 {
                     return new Result()
                     {
                         Status = false,
                         Message = "no recource with this Id"
+                    };
+                }
+
+                var exist = _context.Resource_Exps.FirstOrDefault(x => x.ResourceId == resDb.Id
+                                                                    && x.ExperimentId == exp.Id);
+                if(exist != null)
+                {
+                    return new Result()
+                    {
+                        Status = false,
+                        Message = "recource already in this experiment"
                     };
                 }
 
@@ -278,7 +300,7 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> RemoveRecource(Guid idd, ResourceDto resourceDto)
+        public async Task<Result> GetResource(Guid idd)
         {
             var exp = await _unitOfWork.Experiments.GetByIdd(idd);
             if (exp == null)
@@ -290,7 +312,33 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var resDb = _context.Resources.FirstOrDefault(x => x.Id == resourceDto.Id);
+            var resourcesDtos = await _context.Resource_Exps.Where(x => x.ExperimentId == exp.Id)
+                                .Select(x => new ResourceDto()
+                                {
+                                    Id = x.Resource.Id,
+                                    Name = x.Resource.Name
+                                }).ToListAsync();
+
+            return new Result()
+            {
+                Status = true,
+                Data = resourcesDtos
+            };
+        }
+
+        public async Task<Result> RemoveRecource(Guid idd, Guid resIdd)
+        {
+            var exp = await _unitOfWork.Experiments.GetByIdd(idd);
+            if (exp == null)
+            {
+                return new Result()
+                {
+                    Status = false,
+                    Message = "There is no Experiment with that IDD"
+                };
+            }
+
+            var resDb = _context.Resources.FirstOrDefault(x => x.Id == resIdd);
             if (resDb == null)
             {
                 return new Result()
@@ -301,7 +349,16 @@ namespace LLS.BLL.Services
             }
 
             var res_exp = _context.Resource_Exps.FirstOrDefault(x => x.ResourceId == resDb.Id
-                                                                    && x.ExperimentId == idd);
+                                                                    && x.ExperimentId == exp.Idd);
+
+            if(res_exp == null)
+            {
+                return new Result()
+                {
+                    Status = false,
+                    Message = "recource is not in this experiment"
+                };
+            }
 
             _context.Resource_Exps.Remove(res_exp);
 
@@ -339,8 +396,7 @@ namespace LLS.BLL.Services
                                         });
         }
 
-
-
+       
 
         public class IgnorePropertiesResolver : DefaultContractResolver
         {

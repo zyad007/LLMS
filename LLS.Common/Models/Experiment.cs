@@ -24,6 +24,10 @@ namespace LLS.Common.Models
         //Assigned Courses for this Expirment
         public List<Exp_Course> Exp_Courses { get; set; }
         public bool Active { get; set; } = true; //Indecates if the Exp is a Copy{False} in Course or Pure{True} Exp
+        public bool Editable { get; set; } = true; // Alaway True for Pure Exp
+                                                   // And True for CopyExp untill
+                                                   // at least One student start it, then False.
+
 
         //Recourse
         public List<Resource_Exp> Resource_Exps { get; set; }
