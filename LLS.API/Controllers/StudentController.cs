@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace LLS.API.Controllers
@@ -20,31 +21,37 @@ namespace LLS.API.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "GetAssignedExp_Student")]
-        [HttpGet("{idd}/Experiments")]
-        public async Task<IActionResult> GetAllExpAssignedToStudent(Guid idd)
+        [HttpGet("Experiments")]
+        public async Task<IActionResult> GetAllExpAssignedToStudent()
         {
-            var res = await _sudentService.GetAssignedExpForStudent(idd);
+            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            var res = await _sudentService.GetAssignedExpForStudent(new Guid(userId));
 
             return CheckResult(res);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "GetAssignedCourse_Student")]
-        [HttpGet("{idd}/Courses")]
-        public async Task<IActionResult> GetStudentCourses(Guid idd)
+        [HttpGet("Courses")]
+        public async Task<IActionResult> GetStudentCourses()
         {
-            var res = await _sudentService.GetStudentCourses(idd);
+            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            var res = await _sudentService.GetStudentCourses(new Guid(userId));
 
             return CheckResult(res);
         }
 
-        //[HttpPost("Submit")]
-        //public async Task<IActionResult> SubmintExp(StudentSubmit studentSubmit)
-        //{
-        //    var res = await _sudentService.SubmitExp(studentSubmit);
+        [HttpPost("Submit")]
+        public async Task<IActionResult> SubmintExp(StudentSubmit studentSubmit)
+        {
+            var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
 
-        //    return CheckResult(res);
-        //}
+            var res = await _sudentService.SubmitExp(studentSubmit, userEmail);
+
+            return CheckResult(res);
+        }
 
         //[HttpGet("Result")]
         //public async Task<IActionResult> GetStudentResults(string email, string courseIdd, Guid expIdd)

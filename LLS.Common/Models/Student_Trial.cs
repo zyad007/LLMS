@@ -11,9 +11,9 @@ namespace LLS.Common.Models
     {
         public Guid Id { get; set; }
 
-        public Guid Student_ExpCourseId { get; set; }
+        public Guid StudentCourse_ExpCourseId { get; set; }
 
-        [ForeignKey(nameof(Student_ExpCourseId))]
+        [ForeignKey(nameof(StudentCourse_ExpCourseId))]
         public StudentCourse_ExpCourse StudentCourse_ExpCourse { get; set; }
 
         public int TrialNumber {get;set;}
@@ -22,7 +22,7 @@ namespace LLS.Common.Models
         public float TotalScore { get; set; }
         public float TotalTimeInMin { get; set; }
 
-        public string LRO_SA { get; set; }
+        public string LLA { get; set; }
         public string LRO { get; set; }
         
     }

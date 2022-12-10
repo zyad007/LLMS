@@ -25,7 +25,8 @@ namespace LLS.API.Controllers
             _userService = userService;
         }
 
-
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_User")]
         [HttpPost("RegisterUsers")]
         public async Task<IActionResult> RegisterUsersAPI(IFormFile usersFile)
         {
@@ -93,6 +94,8 @@ namespace LLS.API.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_User")]
         [HttpPost("RegisterUser")]
         public async Task<IActionResult> RegisterUserAPI(UpdateUser registerUser)
         {

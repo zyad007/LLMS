@@ -58,7 +58,7 @@ namespace LLS.DAL.Data
             builder.Entity<Student_Trial>()
                 .HasOne(b => b.StudentCourse_ExpCourse)
                 .WithMany(x => x.Trials)
-                .HasForeignKey(x => x.Student_ExpCourseId);
+                .HasForeignKey(x => x.StudentCourse_ExpCourseId);
 
             //// Resource_Machine
             //builder.Entity<Resource_Machine>()

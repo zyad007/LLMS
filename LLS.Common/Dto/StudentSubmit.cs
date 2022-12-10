@@ -9,10 +9,9 @@ namespace LLS.Common.Dto
 {
     public class StudentSubmit
     {
-        public LLO LRO_SA { get; set; }
+        public LLO lla { get; set; }
         public Guid expIdd { get; set; }
-        public string email { get; set; }
-        public string courseIdd { get; set; }
+        public Guid courseIdd { get; set; }
         public float TotalTimeInMin { get; set; }
     }
 }

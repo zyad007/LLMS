@@ -27,6 +27,7 @@ namespace LLS.DAL.Repositories
             return await _set.FirstOrDefaultAsync(x => x.Idd == idd);
         }
 
+
         public async Task Update(User user)
         {
             var res = await _set.FirstOrDefaultAsync(x => x.Idd == user.Idd);

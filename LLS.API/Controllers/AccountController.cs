@@ -1,10 +1,12 @@
 ﻿using LLS.BLL.IServices;
 using LLS.Common.Dto.Logins;
 using LLS.Common.Transfere_Layer_Object;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using static LLS.BLL.Services.AccountService;
 
@@ -113,6 +115,8 @@ namespace LLS.API.Controllers
             }
             );
         }
+
+        
 
         private Result AuthToRes(AuthResult authResult)
         {

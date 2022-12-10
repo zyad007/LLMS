@@ -30,9 +30,9 @@ namespace LLS.BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<Result> GetAssignedExpForStudent(Guid userIdd)
+        public async Task<Result> GetAssignedExpForStudent(Guid userId)
         {
-            var user = await _unitOfWork.Users.GetByIdd(userIdd);
+            var user = await _unitOfWork.Users.GetById(userId);
             if(user == null)
             {
                 return new Result()
@@ -84,9 +84,9 @@ namespace LLS.BLL.Services
 
         }
 
-        public async Task<Result> GetStudentCourses(Guid userIdd)
+        public async Task<Result> GetStudentCourses(Guid userId)
         {
-            var user = await _unitOfWork.Users.GetByIdd(userIdd);
+            var user = await _unitOfWork.Users.GetById(userId);
             if (user == null)
             {
                 return new Result()
@@ -181,102 +181,97 @@ namespace LLS.BLL.Services
 
         //}
 
-        //public async Task<Result> SubmitExp(StudentSubmit submit)
+        public async Task<Result> SubmitExp(StudentSubmit submit, string email)
+        {
+            var user = await _unitOfWork.Users.GetByEmail(email);
+            if (user == null)
+            {
+                return new Result()
+                {
+                    Message = "User doesn't exist",
+                    Status = false
+                };
+            }
+
+            if (user.Role.ToLower() != "student")
+            {
+                return new Result()
+                {
+                    Message = "User doesn't have Student Role",
+                    Status = false
+                };
+            }
+
+            var course = await _unitOfWork.Courses.GetByIdd(submit.courseIdd);
+            if (course == null)
+                return new Result()
+                {
+                    Message = "there is no course with this IDD",
+                    Status = false
+                };
+
+            var exp = await _unitOfWork.Experiments.GetByIdd(submit.expIdd);
+            if (exp == null)
+                return new Result()
+                {
+                    Message = "there is no Experiment with this IDD",
+                    Status = false
+                };
+
+            var expCourse = await _context.Exp_Courses
+                .FirstOrDefaultAsync(x => x.ExperimentId == exp.Id && x.CourseId == course.Id);
+
+            var studentCourse = await _context.User_Courses
+                .FirstOrDefaultAsync(x => x.UserId == user.Id && x.CourseId == course.Id);
+
+            var studentCourse_expCourse = await _context.StudentCourse_ExpCourses
+                .FirstOrDefaultAsync(x => x.Exp_CourseId == expCourse.Id && x.Student_CourseId == studentCourse.Id);
+
+            if(studentCourse_expCourse.NumberOfTials == expCourse.NumbersOfTrials)
+            {
+                return new Result()
+                {
+                    Message = "There is no trials left for this Exp",
+                    Status = false
+                };
+            }
+
+            var studentTrial = new Student_Trial()
+            {
+                TotalTimeInMin = submit.TotalTimeInMin,
+                LLA = JsonConvert.SerializeObject(submit.lla, Formatting.None,
+                                        new JsonSerializerSettings
+                                        {
+                                            NullValueHandling = NullValueHandling.Ignore
+                                        }),
+                StudentCourse_ExpCourse = studentCourse_expCourse,
+                StudentCourse_ExpCourseId = studentCourse_expCourse.Id,
+                IsGraded = false
+            };
+
+
+            //AutoGrade(studentSubmint, exp, stu_expCourse.NumberOfTials);
+            var res = await _context.Trials.AddAsync(studentTrial);
+
+            await _unitOfWork.SaveAsync();
+
+            return new Result()
+            {
+                Message = "Submited Successfully",
+                Status = true
+            };
+        }
+
+
+        //private void AutoGrade(Student_Trial studentSubmint, Experiment exp, int trialsCount)
         //{
-        //    var user = await _unitOfWork.Users.GetByEmail(submit.email);
-        //    if (user == null)
-        //    {
-        //        return new Result()
-        //        {
-        //            Message = "User doesn't exist",
-        //            Status = false
-        //        };
-        //    }
-
-        //    if (user.Role.ToLower() != "student")
-        //    {
-        //        return new Result()
-        //        {
-        //            Message = "User doesn't have Student Role",
-        //            Status = false
-        //        };
-        //    }
-
-        //    var course = await _unitOfWork.Courses.GetByIdd(submit.courseIdd);
-        //    if (course == null)
-        //        return new Result()
-        //        {
-        //            Message = "there is no course with this IDD",
-        //            Status = false
-        //        };
-
-        //    var exp = await _unitOfWork.Experiments.GetByIdd(submit.expIdd);
-        //    if (exp == null)
-        //        return new Result()
-        //        {
-        //            Message = "there is no Experiment with this IDD",
-        //            Status = false
-        //        };
-
-        //    var expCourse = await _context.Exp_Courses
-        //        .FirstOrDefaultAsync(x => x.ExperimentId == exp.Id);
-            
-        //    var stu_trials = await _context.Student_ExpCourses.Where(x => x.StudentId == user.Id
-        //    && x.Exp_CourseId == expCourse.Id)
-        //        .Select(x => x.Trials).FirstOrDefaultAsync();
-
-        //    var stu_expCourse = await _context.Student_ExpCourses
-        //        .FirstOrDefaultAsync(x => x.StudentId == user.Id);
-
-        //    if (stu_trials.Count < expCourse.NumbersOfTrials)
-        //    {
-
-        //        var studentSubmint = new Student_Trial()
-        //        {
-        //            TotalTimeInMin = submit.TotalTimeInMin,
-        //            LRO_SA = JsonConvert.SerializeObject(submit.LRO_SA, Formatting.None,
-        //                                new JsonSerializerSettings
-        //                                {
-        //                                    NullValueHandling = NullValueHandling.Ignore
-        //                                }),
-        //            Student_ExpCourseId = stu_expCourse.Id,
-        //            Student_ExpCourse = stu_expCourse
-        //        };
-
-                
-
-        //        //AutoGrade(studentSubmint, exp, stu_expCourse.NumberOfTials);
-        //        var res = await _context.Trials.AddAsync(studentSubmint);
-        //        stu_expCourse.NumberOfTials++;
-
-        //        await _unitOfWork.SaveAsync();
-
-        //        return new Result()
-        //        {
-        //            Message = "Submited Successfully",
-        //            Status = true
-        //        };
-        //    }
-
-        //    return new Result()
-        //    {
-        //        Message = "There is no other trial for this Exp",
-        //        Status = false
-        //    };
-
-
-        //}
-
-
-        //private void AutoGrade(Student_Trial studentSubmint, Experiment exp,int trialsCount)
-        //{
-        //    var LRO_SA = JsonConvert.DeserializeObject<LLO>(studentSubmint.LRO_SA);
+        //    var LRO_SA = JsonConvert.DeserializeObject<LLO>(studentSubmint.LLA);
         //    var LLO_MA = JsonConvert.DeserializeObject<LLO>(exp.LLO_MA);
         //    float globalScore = 0;
 
         //    for (int i = 0; i < LLO_MA.Sections.Count; i++)
         //    {
-        //        for(int j = 0; j < LLO_MA.Sections[i].Blocks.Count; j++)
+        //        for (int j = 0; j < LLO_MA.Sections[i].Blocks.Count; j++)
         //        {
         //            if (LLO_MA.Sections[i].Blocks[j].MainType == Common.Enums.MainType.QUESTION)
         //                continue;
@@ -284,11 +279,11 @@ namespace LLS.BLL.Services
         //        }
         //    }
 
-        //    for(int i=0; i<LLO_MA.Sections.Count; i++)
+        //    for (int i = 0; i < LLO_MA.Sections.Count; i++)
         //    {
-        //        for(int j = 0; j < LLO_MA.Sections[i].Blocks.Count; j++)
+        //        for (int j = 0; j < LLO_MA.Sections[i].Blocks.Count; j++)
         //        {
-        //            if(LLO_MA.Sections[i].Blocks[j].Config.Grading == "1")
+        //            if (LLO_MA.Sections[i].Blocks[j].Config.Grading == "1")
         //            {
         //                if (LLO_MA.Sections[i].Blocks[j].Type == Common.Enums.BlockType.OPEN_QUESTION_BLOCK)
         //                {
@@ -324,11 +319,11 @@ namespace LLS.BLL.Services
         //                    for (int k = 0; k < LRO_SA.Sections[i].Blocks[j].Score.statements.Count; k++)
         //                    {
         //                        var id = LRO_SA.Sections[i].Blocks[j].Score.statements[k].statementId;
-        //                        if(LLO_MA.Sections[i].Blocks[j].Score.statements[id].answer == LRO_SA.Sections[i].Blocks[j].Score.statements[k].answer)
+        //                        if (LLO_MA.Sections[i].Blocks[j].Score.statements[id].answer == LRO_SA.Sections[i].Blocks[j].Score.statements[k].answer)
         //                        {
         //                            totalScore += LLO_MA.Sections[i].Blocks[j].Score.statements[id].score;
         //                        }
-                                
+
         //                    }
 
         //                    LRO_SA.Sections[i].Blocks[j].Score = LLO_MA.Sections[i].Blocks[j].Score;
@@ -342,16 +337,16 @@ namespace LLS.BLL.Services
         //            }
 
         //        }
-            //}
+        //    }
 
-            //studentSubmint.LRO = JsonConvert.SerializeObject(LRO_SA, Formatting.None,
-            //                            new JsonSerializerSettings
-            //                            {
-            //                                NullValueHandling = NullValueHandling.Ignore
-            //                            });
+        //    studentSubmint.LRO = JsonConvert.SerializeObject(LRO_SA, Formatting.None,
+        //                                new JsonSerializerSettings
+        //                                {
+        //                                    NullValueHandling = NullValueHandling.Ignore
+        //                                });
 
-            //studentSubmint.TotalScore = globalScore;
-            //studentSubmint.TrialNumber++;
+        //    studentSubmint.TotalScore = globalScore;
+        //    studentSubmint.TrialNumber++;
         //}
 
         //public async Task<Result> ReserveTimeSlot(string email,Guid expIdd, string courseIdd,int timeSlot)
@@ -488,7 +483,7 @@ namespace LLS.BLL.Services
 
         //        }
         //    }
-            
+
 
         //    await _context.SaveChangesAsync();
 

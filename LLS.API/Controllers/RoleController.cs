@@ -13,6 +13,10 @@ using System.Linq;
 using System.Security.Claims;
 using LLS.DAL.Data;
 using LLS.Common.Enums;
+using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
+using LLS.Common.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace LLS.API.Controllers
 {
@@ -21,14 +25,74 @@ namespace LLS.API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
         public RoleController(IUnitOfWork unitOfWork, 
             RoleManager<IdentityRole> roleManager,
-             AppDbContext context)
+             AppDbContext context,
+             IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _roleManager = roleManager;
             _context = context;
+            _mapper = mapper;
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("Get-Info")]
+        public async Task<IActionResult> GetUserInfo()
+        {
+            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            if(userId == null)
+            {
+                return BadRequest(new Result()
+                {
+                    Message = "Invalid Payload",
+                    Status = false
+                });
+            }
+
+            var user = _context.Users.FirstOrDefault(x => x.IdentityId.ToString() == userId);
+
+            if (user == null)
+            {
+                return BadRequest(new Result()
+                {
+                    Message = "User not found",
+                    Status = false
+                });
+            }
+
+            var userDto = _mapper.Map<UserDto>(user);
+
+            if (user.Role.ToLower() == "user")
+            {
+                return Ok(new Result()
+                {
+                    Data = new { User = userDto },
+                    Message = "User Have no Permission",
+                    Status = true
+                });
+            }
+
+            var role = await _roleManager.FindByNameAsync(user.Role);
+
+            var result = await _roleManager.GetClaimsAsync(role);
+            var perms = new List<string>();
+            if (result != null)
+            {
+                perms = result.Select(x => x.Value).ToList();
+            }
+
+            
+
+            return Ok(new Result()
+            {
+                Data = new { User = userDto, Permission = perms},
+                Status = true
+            });
+        }
+
 
         [HttpPost("Create")]
         public async Task<IActionResult> AddRole(Role role)
