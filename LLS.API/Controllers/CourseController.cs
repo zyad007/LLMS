@@ -117,19 +117,16 @@ namespace LLS.API.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "AssignUserToCourse")]
         [HttpPost("{idd}/Assign-Students")]
-        public async Task<IActionResult> AssignStudentToCourse(List<Guid> userIdds, Guid idd)
+        public async Task<IActionResult> AssignStudentToCourse(StudentsAssign userIdds, Guid idd)
         {
-            foreach (var userIdd in userIdds)
+            var list = new List<Result>();
+            foreach (var userIdd in userIdds.UserIdds)
             {
-                await _courseService.AssignUserToCourse(userIdd, idd, "student");
+                var res = await _courseService.AssignUserToCourse(userIdd, idd, "student");
+                list.Add(res);
             }
-            var result = new Result()
-            {
-                Status = true,
-                Message = "Students Assigned"
-            };
-
-            return CheckResult(result);
+            
+            return Ok(list);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
@@ -163,5 +160,10 @@ namespace LLS.API.Controllers
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int NumberOfTrials { get; set; }
+    }
+
+    public class StudentsAssign
+    {
+        public List<Guid> UserIdds { get; set; }
     }
 }

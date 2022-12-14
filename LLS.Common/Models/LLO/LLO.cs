@@ -10,6 +10,6 @@ namespace LLS.Common.Models.LLO
 {
     public class LLO
     {
-        public List<Page> Sections { get; set; }
+        public List<Section> Sections { get; set; }
     }
 }

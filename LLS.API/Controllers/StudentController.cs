@@ -21,28 +21,42 @@ namespace LLS.API.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "GetAssignedExp_Student")]
-        [HttpGet("Experiments")]
+        [HttpGet("Assigned-Experiments")]
         public async Task<IActionResult> GetAllExpAssignedToStudent()
         {
-            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
 
-            var res = await _sudentService.GetAssignedExpForStudent(new Guid(userId));
+            var res = await _sudentService.GetAssignedExpForStudent(userEmail);
 
             return CheckResult(res);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "GetAssignedCourse_Student")]
-        [HttpGet("Courses")]
-        public async Task<IActionResult> GetStudentCourses()
+        [HttpGet("Completed-Experiments")]
+        public async Task<IActionResult> GetAllCompletedExp()
         {
-            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
 
-            var res = await _sudentService.GetStudentCourses(new Guid(userId));
+            var res = await _sudentService.GetCompletedExp(userEmail);
 
             return CheckResult(res);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "GetAssignedCourse_Student")]
+        [HttpGet("Assigned-Courses")]
+        public async Task<IActionResult> GetStudentCourses()
+        {
+            var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
+
+            var res = await _sudentService.GetStudentCourses(userEmail);
+
+            return CheckResult(res);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "GetAssignedCourse_Student")]
         [HttpPost("Submit")]
         public async Task<IActionResult> SubmintExp(StudentSubmit studentSubmit)
         {

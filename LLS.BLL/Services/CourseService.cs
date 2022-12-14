@@ -181,7 +181,7 @@ namespace LLS.BLL.Services
                 return new Result()
                 {
                     Status = false,
-                    Message = $"User must have the Role {role} to be Assigned as A {role}"
+                    Message = $"{user.Email}: must have the Role {role} to be Assigned as A {role}"
                 };
 
             var check = await _context.User_Courses.FirstOrDefaultAsync(x => x.CourseId == course.Id && x.UserId == user.Id);
@@ -190,7 +190,7 @@ namespace LLS.BLL.Services
                 return new Result()
                 {
                     Status = false,
-                    Message = "This User is already assigned to the course"
+                    Message = $"{user.Email}: is already assigned to the course"
                 };
             }
 
@@ -208,7 +208,7 @@ namespace LLS.BLL.Services
                 return new Result()
                 {
                     Status = false,
-                    Message = "Something went wrong"
+                    Message = $"{user.Email}:Something went wrong"
                 };
 
             if(role.ToLower() == "student")
@@ -238,7 +238,7 @@ namespace LLS.BLL.Services
             return new Result()
             {
                 Status = true,
-                Message = $"User has been added to the Course Successfully with Role {role}"
+                Message = $"{user.Email}: has been added to the Course Successfully with Role {role}"
             };
         }
 

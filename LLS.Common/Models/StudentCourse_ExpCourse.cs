@@ -26,5 +26,7 @@ namespace LLS.Common.Models
         
         public List<Student_Trial> Trials { get; set; }
         public int NumberOfTials { get { return Trials.Count; } }
+        public bool IsCompleted { get; set; }
+
     }
 }

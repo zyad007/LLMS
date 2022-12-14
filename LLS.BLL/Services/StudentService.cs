@@ -30,9 +30,9 @@ namespace LLS.BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<Result> GetAssignedExpForStudent(Guid userId)
+        public async Task<Result> GetAssignedExpForStudent(string email)
         {
-            var user = await _unitOfWork.Users.GetById(userId);
+            var user = await _unitOfWork.Users.GetByEmail(email);
             if(user == null)
             {
                 return new Result()
@@ -52,9 +52,17 @@ namespace LLS.BLL.Services
             }
 
             var Exp_Courses = await _context.User_Courses.Where(n => n.UserId == user.Id)
-                                        .Select(x => x.StudentCourse_ExpCourses.Select(x => x.Exp_Course).ToList())
+                                        .Select(x => x.StudentCourse_ExpCourses.Where(x=>!x.IsCompleted).Select(x => x.Exp_Course).ToList())
                                         .FirstOrDefaultAsync();
 
+            if (!Exp_Courses.Any())
+            {
+                return new Result()
+                {
+                    Message = "There is no experiments assigned for user",
+                    Status = false
+                };
+            }
 
             var expsDto = new List<ExpDto>();
             foreach (var exp_course in Exp_Courses)
@@ -84,9 +92,9 @@ namespace LLS.BLL.Services
 
         }
 
-        public async Task<Result> GetStudentCourses(Guid userId)
+        public async Task<Result> GetCompletedExp(string email)
         {
-            var user = await _unitOfWork.Users.GetById(userId);
+            var user = await _unitOfWork.Users.GetByEmail(email);
             if (user == null)
             {
                 return new Result()
@@ -105,7 +113,77 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var courses = _context.User_Courses.Where(x => x.UserId == user.Id || x.Role == "student").Select(x=>x.Course).ToList();
+            var Exp_Courses = await _context.User_Courses.Where(n => n.UserId == user.Id)
+                                        .Select(x => x.StudentCourse_ExpCourses.Where(x=>x.IsCompleted).Select(x => x.Exp_Course).ToList())
+                                        .FirstOrDefaultAsync();
+            if (Exp_Courses.Any())
+            {
+                return new Result()
+                {
+                    Message = "There is no experiments completed",
+                    Status = false
+                };
+            }
+
+            var expsDto = new List<ExpDto>();
+            foreach (var exp_course in Exp_Courses)
+            {
+                var exp = await _context.Expirments.FirstOrDefaultAsync(x => x.Id == exp_course.ExperimentId);
+                var course = await _context.Courses.FirstOrDefaultAsync(x => x.Id == exp_course.CourseId);
+                var expDto = new ExpDto()
+                {
+                    Name = exp.Name,
+                    Description = exp.Description,
+                    AuthorName = exp.AuthorName,
+                    CourseName = course.Name,
+                    CourseIdd = course.Idd,
+                    StartDate = exp_course.StartDate,
+                    EndDate = exp_course.EndDate
+                };
+
+                expsDto.Add(expDto);
+            }
+
+
+            return new Result()
+            {
+                Data = expsDto,
+                Status = true
+            };
+
+        }
+
+        public async Task<Result> GetStudentCourses(string email)
+        {
+            var user = await _unitOfWork.Users.GetByEmail(email);
+            if (user == null)
+            {
+                return new Result()
+                {
+                    Message = "User doesn't exist",
+                    Status = false
+                };
+            }
+
+            if (user.Role.ToLower() != "student")
+            {
+                return new Result()
+                {
+                    Message = "User doesn't have Student Role",
+                    Status = false
+                };
+            }
+
+            var courses = _context.User_Courses.Where(x => x.UserId == user.Id && x.Role == "student").Select(x=>x.Course).ToList();
+            if(courses.Any())
+            {
+                return new Result()
+                {
+                    Message = "User have no assgined courses",
+                    Status = false
+                };
+            }
+
             var coursesDto = new List<CourseDto>();
             foreach(var course in courses)
             {
@@ -235,6 +313,8 @@ namespace LLS.BLL.Services
                     Status = false
                 };
             }
+
+            studentCourse_expCourse.IsCompleted = true;
 
             var studentTrial = new Student_Trial()
             {

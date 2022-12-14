@@ -10,9 +10,10 @@ namespace LLS.BLL.IServices
 {
     public interface IStudentService
     {
-        Task<Result> GetAssignedExpForStudent(Guid userIdd);
-        Task<Result> GetStudentCourses(Guid userIdd);
+        Task<Result> GetAssignedExpForStudent(string email);
+        Task<Result> GetStudentCourses(string email);
         Task<Result> SubmitExp(StudentSubmit submit, string email);
+        Task<Result> GetCompletedExp(string email);
         //Task<Result> GetStudentResult(string email, string courseIdd, Guid expIdd);
         //Task<Result> ReserveTimeSlot(string email, Guid expIdd, string courseIdd, int timeSlot);
     }

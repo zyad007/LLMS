@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace LLS.Common.Models.LLO.Pages
 {
-    public class Page
+    public class Section
     {
         public int index { get; set; }
         public string title { get; set; }

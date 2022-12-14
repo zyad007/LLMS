@@ -16,8 +16,8 @@ namespace LLS.API.Controllers
             _enviroment = enviroment;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
-            Policy = "AddDeleteEdit_Exp")]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+        //    Policy = "AddDeleteEdit_Exp")]
         [HttpPost("Upload-Image")]
         public IActionResult UploadImage(IFormFile imageUpload)
         {
