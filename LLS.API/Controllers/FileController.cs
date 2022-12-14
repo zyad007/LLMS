@@ -49,7 +49,7 @@ namespace LLS.API.Controllers
                 objFile.CopyTo(fileStream);
             }
 
-            var imageUrl = "https://lls-api.herokuapp.com/Images/" + newFileName;
+            var imageUrl = "https://af1e-193-227-34-5.eu.ngrok.io/Images/" + newFileName;
 
             return Ok(new
             {
