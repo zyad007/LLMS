@@ -17,18 +17,18 @@ namespace LLS.API.Controllers
             this.mailService = mailService;
         }
         [HttpPost("send")]
-        public async Task<IActionResult> SendMail([FromForm] MailRequest request)
+        public IActionResult SendMail([FromForm] MailRequest request)
         {
-            try
-            {
-                await mailService.SendEmailAsync(request);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-
+            //try
+            //{
+            //    await mailService.SendEmailAsync(request);
+            //    return Ok();
+            //}
+            //catch ()
+            //{
+            //    throw;
+            //}
+            return Ok();
         }
     }
 }

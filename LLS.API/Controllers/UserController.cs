@@ -149,9 +149,9 @@ namespace LLS.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUser()
+        public async Task<IActionResult> GetAllUser(Guid courseIdd)
         {
-            var res = await _userService.GetAllUsers();
+            var res = await _userService.GetAllUsers(courseIdd);
 
             return CheckResult(res);
         }

@@ -51,15 +51,34 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var Exp_Courses = await _context.User_Courses.Where(n => n.UserId == user.Id)
-                                        .Select(x => x.StudentCourse_ExpCourses.Where(x=>!x.IsCompleted).Select(x => x.Exp_Course).ToList())
-                                        .FirstOrDefaultAsync();
+            var user_Courses = await _context.User_Courses.Where(n => n.UserId == user.Id)
+                              .ToListAsync();
 
-            if (!Exp_Courses.Any())
+            var Exp_Courses = new List<Exp_Course>();
+
+            foreach (var user_course in user_Courses)
+            {
+                var temp = await _context.StudentCourse_ExpCourses.Where(x => !x.IsCompleted && x.Student_CourseId == user_course.Id)
+                                .Select(x => x.Exp_Course).ToListAsync();
+                Exp_Courses.AddRange(temp);
+            }
+
+            try
+            {
+                if (!Exp_Courses.Any())
+                {
+                    return new Result()
+                    {
+                        Message = "There is no assigned experiment",
+                        Status = false
+                    };
+                }
+            }
+            catch (ArgumentNullException)
             {
                 return new Result()
                 {
-                    Message = "There is no experiments assigned for user",
+                    Message = "There is no experiments assigned for user ex",
                     Status = false
                 };
             }
@@ -71,6 +90,7 @@ namespace LLS.BLL.Services
                 var course = await _context.Courses.FirstOrDefaultAsync(x => x.Id == exp_course.CourseId);
                 var expDto = new ExpDto()
                 {
+                    Idd = exp.Idd,
                     Name = exp.Name,
                     Description = exp.Description,
                     AuthorName = exp.AuthorName,
@@ -113,14 +133,32 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var Exp_Courses = await _context.User_Courses.Where(n => n.UserId == user.Id)
-                                        .Select(x => x.StudentCourse_ExpCourses.Where(x=>x.IsCompleted).Select(x => x.Exp_Course).ToList())
-                                        .FirstOrDefaultAsync();
-            if (Exp_Courses.Any())
+            var user_Courses = await _context.User_Courses.Where(n => n.UserId == user.Id)
+                              .ToListAsync();
+
+            var Exp_Courses = new List<Exp_Course>();
+
+            foreach (var user_course in user_Courses)
+            {
+                var temp = await _context.StudentCourse_ExpCourses.Where(x => x.IsCompleted && x.Student_CourseId == user_course.Id)
+                                .Select(x => x.Exp_Course).ToListAsync();
+                Exp_Courses.AddRange(temp);
+            }
+
+            try { if (Exp_Courses.Any())
+                    {
+                        return new Result()
+                        {
+                            Message = "There is no completed experiment",
+                            Status = false
+                        };
+                    }
+            }
+            catch (ArgumentNullException)
             {
                 return new Result()
                 {
-                    Message = "There is no experiments completed",
+                    Message = "There is no completed experiment ex",
                     Status = false
                 };
             }
@@ -175,7 +213,7 @@ namespace LLS.BLL.Services
             }
 
             var courses = _context.User_Courses.Where(x => x.UserId == user.Id && x.Role == "student").Select(x=>x.Course).ToList();
-            if(courses.Any())
+            if(!courses.Any())
             {
                 return new Result()
                 {

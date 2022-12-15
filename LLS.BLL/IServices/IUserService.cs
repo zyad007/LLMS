@@ -20,7 +20,8 @@ namespace LLS.BLL.IServices
         Task<Result> DeleteUser(Guid userIdd);
         Task<Result> GetUserByEmail(string email);
         Task<Result> GetUserByIdd(Guid userIdd);
-        Task<Result> GetAllUsers();
+        Task<Result> GetAllUsers(Guid courseIdd); // To Filter All Already assigned users form the list
+                                                  // if courseIdd is provided in Quyers.
         Task<Result> GetAllUserWithRole(string role);
     }
 }

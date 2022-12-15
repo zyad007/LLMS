@@ -230,8 +230,9 @@ namespace LLS.BLL.Services
                 }
 
 
-                course.NumberOfStudents++;
             }
+
+            course.NumberOfStudents++;
 
             await _unitOfWork.SaveAsync();
 
@@ -356,7 +357,7 @@ namespace LLS.BLL.Services
 
             foreach (var student in students)
             {
-                var studentCourse = course.User_Courses.FirstOrDefault(x => x.UserId == student.Id);
+                var studentCourse = await _context.User_Courses.FirstOrDefaultAsync(x => x.UserId == student.Id && x.CourseId == course.Id);
 
                 var student_expCourse = new StudentCourse_ExpCourse()
                 {
@@ -368,7 +369,6 @@ namespace LLS.BLL.Services
 
                 await _context.StudentCourse_ExpCourses.AddAsync(student_expCourse);
             }
-
 
             course.NumberOfExp++;
 

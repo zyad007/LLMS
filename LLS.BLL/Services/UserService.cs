@@ -4,8 +4,10 @@ using LLS.Common.Dto;
 using LLS.Common.Dto.Logins;
 using LLS.Common.Models;
 using LLS.Common.Transfere_Layer_Object;
+using LLS.DAL.Data;
 using LLS.DAL.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,17 +23,20 @@ namespace LLS.BLL.Services
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IMapper _iMapper;
         private readonly IAccountService _accountService;
+        private readonly AppDbContext _context;
         public UserService(IUnitOfWork unitOfWork,
             UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
             IMapper iMapper,
-            IAccountService accountService)
+            IAccountService accountService,
+            AppDbContext context)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _roleManager = roleManager;
             _iMapper = iMapper;
             _accountService = accountService;
+            _context = context;
         }
 
 
@@ -237,13 +242,39 @@ namespace LLS.BLL.Services
             return await _accountService.Login(new Login { Email = email, Password = password });
         }
 
-        public async Task<Result> GetAllUsers()
+        public async Task<Result> GetAllUsers(Guid courseIdd)
         {
             var users = await _unitOfWork.Users.GetAll();
 
+            var filterdUser = new List<User>();
+
+            if(courseIdd != Guid.Empty)
+            {
+                var course = await _context.Courses.FirstOrDefaultAsync(x => x.Idd == courseIdd);
+
+                if(course == null)
+                {
+                    return new Result()
+                    {
+                        Message = "No course with tihs IDD",
+                        Status = false
+                    };
+                }
+
+                foreach (var user in users)
+                {
+                    var isAssigned = await _context.User_Courses.FirstOrDefaultAsync(x => x.CourseId == course.Id && x.UserId == user.Id);
+                    
+                    if(isAssigned == null)  filterdUser.Add(user);    
+                }
+            }else
+            {
+                filterdUser = users;
+            }
+
             var usersDto = new List<UserDto>();
 
-            foreach(var user in users)
+            foreach(var user in filterdUser)
             {
                 var userDto = _iMapper.Map<UserDto>(user);
                 usersDto.Add(userDto);
