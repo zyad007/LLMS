@@ -129,7 +129,7 @@ namespace LLS.DAL.Repositories
             //Add Role in User model Db
             var id = new Guid(user.Id);
             var userModel = await GetUserByIdentityId(id);
-            userModel.Role = roleName;
+            userModel.Role = roleName.ToUpper();
             var updateUserRole = await UpdateIdentityId(id, userModel);
             if (!updateUserRole)
             {
@@ -213,7 +213,7 @@ namespace LLS.DAL.Repositories
             //Add Role in User model Db
             var id = new Guid(user.Id);
             var userModel = await GetUserByIdentityId(id);
-            userModel.Role = "User";
+            userModel.Role = "USER";
             var updateUserRole = await UpdateIdentityId(id, userModel);
             if (!updateUserRole)
             {
@@ -303,7 +303,7 @@ namespace LLS.DAL.Repositories
 
         private async Task<bool> UserDeleteRole(string roleName)
         {
-            var users = await _context.Users.Where(x => x.Role == roleName)
+            var users = await _context.Users.Where(x => x.Role.ToLower() == roleName.ToLower())
                                             .ToListAsync();
             if (users == null)
             {
@@ -312,7 +312,7 @@ namespace LLS.DAL.Repositories
 
             foreach (var user in users)
             {
-                user.Role = "User";
+                user.Role = "USER";
             }
 
             return true;

@@ -198,8 +198,8 @@ namespace LLS.BLL.Services
                 await _context.SaveChangesAsync();
 
                 // Generate a new token
-                var dbUser = await _userManager.FindByIdAsync(storedToken.UserId);
-                return await GenerateJwtToken(dbUser);
+                var userIdenty = await _userManager.FindByIdAsync(storedToken.UserId);
+                return await GenerateJwtToken(userIdenty);
             }
             catch (Exception ex)
             {
@@ -276,12 +276,13 @@ namespace LLS.BLL.Services
         private async Task<List<Claim>> GetValidClaims(IdentityUser user)
         {
             var options = new IdentityOptions();
-
+            var userDb = await _context.Users.FirstOrDefaultAsync(x => x.IdentityId == new Guid(user.Id));
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // id for Token used for refresh token
+                new Claim("fullName", userDb.FirstName + " " + userDb.Lastname)
             };
 
             // Getting the claims that we have assigned to user

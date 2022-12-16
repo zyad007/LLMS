@@ -171,7 +171,7 @@ namespace LLS.BLL.Services
             userDb.City = user.City;
             userDb.Email = user.Email;
             var exist = await _roleManager.FindByNameAsync(role);
-            if (exist != null) userDb.Role = role;
+            if (exist != null) userDb.Role = role.ToUpper();
 
             var result = await _unitOfWork.Users.Create(userDb);
 
