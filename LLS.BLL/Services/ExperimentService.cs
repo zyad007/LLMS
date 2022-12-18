@@ -136,16 +136,13 @@ namespace LLS.BLL.Services
             }
 
             var expDto = _iMapper.Map<ExpDto>(exp);
-            //if(exp.LLO != null)
-            //{
-            //    expDto.LLO = JsonConvert.DeserializeObject<LLO>(exp.LLO);
-            //}
 
-            //if (exp.LLO_MA != null)
-            //{
-            //    expDto.LLO_MA = JsonConvert.DeserializeObject<LLO>(exp.LLO_MA);
-            //}
-            
+            if (!exp.Active)
+            {
+                var course = await _context.Exp_Courses.Where(x => x.ExperimentId == exp.Id).Select(x=>x.Course).FirstOrDefaultAsync();
+                expDto.CourseIdd = course.Idd;
+                expDto.CourseName = course.Name;
+            }
 
             return new Result()
             {

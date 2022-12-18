@@ -303,6 +303,7 @@ namespace LLS.BLL.Services
             expCopy.AddedDate = DateTime.Now;
             expCopy.UpdateDate = DateTime.Now;
             expCopy.Active = false;
+            
 
             await _unitOfWork.Experiments.Create(expCopy);
 
