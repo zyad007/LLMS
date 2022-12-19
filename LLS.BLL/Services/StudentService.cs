@@ -145,7 +145,7 @@ namespace LLS.BLL.Services
                 Exp_Courses.AddRange(temp);
             }
 
-            try { if (Exp_Courses.Any())
+            try { if (!Exp_Courses.Any())
                     {
                         return new Result()
                         {
@@ -352,7 +352,7 @@ namespace LLS.BLL.Services
                 };
             }
 
-            studentCourse_expCourse.IsCompleted = true;
+            
 
             var studentTrial = new Student_Trial()
             {
@@ -367,6 +367,9 @@ namespace LLS.BLL.Services
                 IsGraded = false
             };
 
+            studentCourse_expCourse.IsCompleted = true;
+
+            studentCourse_expCourse.NumberOfTials++;
 
             //AutoGrade(studentSubmint, exp, stu_expCourse.NumberOfTials);
             var res = await _context.Trials.AddAsync(studentTrial);
