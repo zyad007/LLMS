@@ -12,13 +12,18 @@ namespace LLS.Common.Enums
     {
         TEXT,
         CODE,
-        OPEN_QUESTION,
-        MULTIPLE_CHOICE,
-        SINGLE_CHOICE,
-        TRUE_OR_FALSE,
+        OPEN_QUESTION_BLOCK,
+        MULTI_SELECT_MCQ_BLOCK,
+        SINGLE_SELECT_MCQ_BLOCK,
+        TRUE_OR_FALSE_QUESTION_BLOCK,
+        MATCH,
+        FILL_BLANKS,
+        REORDER,
+        DRAG_TEXT,
         IMAGE,
         MEDIA,
         DOCUMENT,
-        EQUATION
+        EQUATION,
+        FRAME
     }
 }

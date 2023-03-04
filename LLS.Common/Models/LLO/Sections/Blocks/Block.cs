@@ -18,7 +18,7 @@ namespace LLS.Common.Models.LLO.Pages.Blocks
         public Content.Content Content { get; set; }
         public Configs Config { get; set; }
         public Score Score { get; set; }
-        public Score Answers { get; set; }
+        public Score StudentAnswers { get; set; }
         public float StudentScore { get; set; }
 
     }

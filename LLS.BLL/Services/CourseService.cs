@@ -10,9 +10,11 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace LLS.BLL.Services
 {
@@ -86,18 +88,18 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> GetAllCourses()
+        public async Task<Result> GetAllCourses(int page)
         {
-            var courses = await _unitOfWork.Courses.GetAll();
+            //var courses = await _unitOfWork.Courses.GetAll();
 
-            if(!courses.Any())
+            if(page == -1 )
             {
-                return new Result()
-                {
-                    Status = true,
-                    Message = "There is no Courses"
-                };
+                page = 0;
             }
+
+            var courses = _context.Courses.Skip(page*10).Take(10).ToList();
+
+            var count = _context.Courses.Count();
 
             var CourseListDto = new List<CourseDto>();
             foreach(var course in courses)
@@ -109,7 +111,13 @@ namespace LLS.BLL.Services
             return new Result()
             {
                 Status = true,
-                Data = CourseListDto
+                Data = new 
+                {
+                    result = CourseListDto,
+                    count,
+                    next = (page*10)+10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course?page={page+1+1}",
+                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course?page={page-1+1}"
+                }
             };
         }
 
@@ -238,13 +246,19 @@ namespace LLS.BLL.Services
 
             return new Result()
             {
+                Data = _iMapper.Map<UserDto>(user),
                 Status = true,
                 Message = $"{user.Email}: has been added to the Course Successfully with Role {role}"
             };
         }
 
-        public async Task<Result> GetUsersAssignedToCourse(Guid idd, string role)
+        public async Task<Result> GetUsersAssignedToCourse(Guid idd, string role, int page)
         {
+            if (page == -1)
+            {
+                page = 0;
+            }
+
             var course = await _unitOfWork.Courses.GetByIdd(idd);
             if (course == null)
             {
@@ -259,19 +273,20 @@ namespace LLS.BLL.Services
                         .Where(x => x.CourseId == course.Id && x.Role == role.ToLower())
                         .Select(x => _iMapper.Map<UserDto>(x.User)).ToListAsync();
 
-            if (!userListDto.Any())
-            {
-                return new Result()
-                {
-                    Status = false,
-                    Message = "There is no User with this Role"
-                };
-            }
+
+            var users = userListDto.Skip(page*10).Take(10).ToList();
+            int count = userListDto.Count;
 
             return new Result()
             {
                 Status = true,
-                Data = userListDto
+                Data = new
+                {
+                    result = users,
+                    count,
+                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course/{idd}/{role}?page={page + 1+1}",
+                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course/{idd}/{role}?page={page - 1+1}"
+                }
             };
         }
 
@@ -377,12 +392,26 @@ namespace LLS.BLL.Services
             return new Result()
             {
                 Status = true,
-                Data = "Experiment has been added to the Course successfully"
+                Data = new
+                {
+                    idd = expCopy.Idd,
+                    name = expCopy.Name,
+                    description = expCopy.Description,
+                    startDate,
+                    endDate,
+                    NumbersOfTrials = trials
+                }
+                            
             };
         }
 
-        public async Task<Result> GetExpAssignedToCourse(Guid idd)
+        public async Task<Result> GetExpAssignedToCourse(Guid idd, int page)
         {
+            if (page == -1)
+            {
+                page = 0;
+            }
+
             var course = await _unitOfWork.Courses.GetByIdd(idd);
             if (course == null)
             {
@@ -408,22 +437,22 @@ namespace LLS.BLL.Services
                         CourseName = course.Name
                     })
                     .ToListAsync();
-           
 
+            var exps = expListDto.Skip(page * 10).Take(10).ToList();
+            int count = expListDto.Count;
 
-            if (!expListDto.Any())
-            {
-                return new Result()
-                {
-                    Status = true,
-                    Message = "There is no Expirment in this Course"
-                };
-            }
 
             return new Result()
             {
                 Status = true,
-                Data = expListDto
+                Data = new
+                {
+                    result = exps,
+                    count,
+                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course/{idd}/Assign-Experiment?page={page + 1+1}",
+                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course/{idd}/Assign-Experiment?page={page - 1+1}"
+                
+                }
             };
         }
     }

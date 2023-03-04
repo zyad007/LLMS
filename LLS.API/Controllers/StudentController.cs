@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using static LLS.BLL.Services.StudentService;
 
 namespace LLS.API.Controllers
 {
@@ -22,11 +23,11 @@ namespace LLS.API.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "GetAssignedExp_Student")]
         [HttpGet("Assigned-Experiments")]
-        public async Task<IActionResult> GetAllExpAssignedToStudent()
+        public async Task<IActionResult> GetAllExpAssignedToStudent([FromQuery] int page)
         {
             var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
 
-            var res = await _sudentService.GetAssignedExpForStudent(userEmail);
+            var res = await _sudentService.GetAssignedExpForStudent(userEmail, page - 1);
 
             return CheckResult(res);
         }
@@ -34,35 +35,59 @@ namespace LLS.API.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "GetAssignedCourse_Student")]
         [HttpGet("Completed-Experiments")]
-        public async Task<IActionResult> GetAllCompletedExp()
+        public async Task<IActionResult> GetAllCompletedExp([FromQuery] int page)
         {
             var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
 
-            var res = await _sudentService.GetCompletedExp(userEmail);
+            var res = await _sudentService.GetCompletedExp(userEmail, page - 1);
+
+            return CheckResult(res);
+        }
+
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+        //    Policy = "GetAssignedCourse_Student")]
+        //[HttpGet("Assigned-Courses")]
+        //public async Task<IActionResult> GetStudentCourses()
+        //{
+        //    var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
+
+        //    var res = await _sudentService.GetStudentCourses(userEmail);
+
+        //    return CheckResult(res);
+        //}
+
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+        //    Policy = "GetAssignedCourse_Student")]
+        //[HttpPost("Submit")]
+        //public async Task<IActionResult> SubmintExp(StudentSubmit studentSubmit)
+        //{
+        //    var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
+
+        //    var res = await _sudentService.SubmitExp(studentSubmit, userEmail);
+
+        //    return CheckResult(res);
+        //}
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "GetAssignedCourse_Student")]
+        [HttpPost("Start-Trial")]
+        public async Task<IActionResult> StartTrial(Guid courseIdd, Guid expIdd)
+        {
+            var studentIdId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            var res = await _sudentService.startTrial(courseIdd, expIdd, studentIdId);
 
             return CheckResult(res);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "GetAssignedCourse_Student")]
-        [HttpGet("Assigned-Courses")]
-        public async Task<IActionResult> GetStudentCourses()
+        [HttpPost("Submit-Trial")]
+        public async Task<IActionResult> SubmitTrial(TrialSubmit studentSubmit)
         {
-            var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
+            var studentIdId = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
 
-            var res = await _sudentService.GetStudentCourses(userEmail);
-
-            return CheckResult(res);
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
-            Policy = "GetAssignedCourse_Student")]
-        [HttpPost("Submit")]
-        public async Task<IActionResult> SubmintExp(StudentSubmit studentSubmit)
-        {
-            var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
-
-            var res = await _sudentService.SubmitExp(studentSubmit, userEmail);
+            var res = await _sudentService.SubmitTrial(studentSubmit, studentIdId);
 
             return CheckResult(res);
         }
@@ -82,8 +107,5 @@ namespace LLS.API.Controllers
 
         //    return CheckResult(res);
         //}
-
-
-
     }
 }

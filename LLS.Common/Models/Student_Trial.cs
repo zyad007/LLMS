@@ -18,12 +18,17 @@ namespace LLS.Common.Models
 
         public int TrialNumber {get;set;}
 
-        public bool IsGraded = true;
+        public bool IsGraded {get;set;}
         public float TotalScore { get; set; }
         public float TotalTimeInMin { get; set; }
 
         public string LLA { get; set; }
         public string LRO { get; set; }
+
+        public DateTime SubmitedAt { get; set; }
+        public DateTime StartedAt { get; set; }
+
+        public string Status { get; set; }
         
     }
 }

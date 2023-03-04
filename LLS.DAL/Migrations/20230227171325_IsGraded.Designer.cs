@@ -3,15 +3,17 @@ using System;
 using LLS.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace LLS.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230227171325_IsGraded")]
+    partial class IsGraded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -319,17 +321,8 @@ namespace LLS.DAL.Migrations
                     b.Property<string>("LRO")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("StartedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
-
                     b.Property<Guid>("StudentCourse_ExpCourseId")
                         .HasColumnType("uuid");
-
-                    b.Property<DateTime>("SubmitedAt")
-                        .HasColumnType("timestamp without time zone");
 
                     b.Property<float>("TotalScore")
                         .HasColumnType("real");

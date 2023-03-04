@@ -25,7 +25,8 @@ namespace LLS.Common.Models.LLO.Pages
         public bool active { get; set; }
         public string layout { get; set; }
         public bool showScreenShotButton { get; set; }
-        public List<ResourceDto> resources { get; set; }
+        //public List<ResourceDto> resources { get; set; }
+        public string resources { get; set; }
     }
 
     public class config

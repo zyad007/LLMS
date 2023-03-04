@@ -25,98 +25,98 @@ namespace LLS.API.Controllers
             _userService = userService;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
-            Policy = "AddDeleteEdit_User")]
-        [HttpPost("RegisterUsers")]
-        public async Task<IActionResult> RegisterUsersAPI(IFormFile usersFile)
-        {
-            if (usersFile == null || usersFile.Length > 3000000000)
-            {
-                return BadRequest(new Result()
-                {
-                    Message = "file error",
-                    Status = false
-                });
-            }
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+        //    Policy = "AddDeleteEdit_User")]
+        //[HttpPost("RegisterUsers")]
+        //public async Task<IActionResult> RegisterUsersAPI(IFormFile usersFile)
+        //{
+        //    if (usersFile == null || usersFile.Length > 3000000000)
+        //    {
+        //        return BadRequest(new Result()
+        //        {
+        //            Message = "file error",
+        //            Status = false
+        //        });
+        //    }
 
-            try
-            {
-                using var reader = new StreamReader(usersFile.OpenReadStream());
-                var ext = System.IO.Path.GetExtension(usersFile.FileName);
+        //    try
+        //    {
+        //        using var reader = new StreamReader(usersFile.OpenReadStream());
+        //        var ext = System.IO.Path.GetExtension(usersFile.FileName);
 
-                if (ext == ".csv")
-                {
-                    using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-                    var records = csv.GetRecords<RegisterUser>();
+        //        if (ext == ".csv")
+        //        {
+        //            using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        //            var records = csv.GetRecords<RegisterUser>();
 
-                    var listRes = new List<Result>();
+        //            var listRes = new List<Result>();
 
-                    foreach (var user in records)
-                    {
-                        var res = await _userService.RegisterUserWithConfirmToken(user, "student");
-                        listRes.Add(res);
-                    }
+        //            foreach (var user in records)
+        //            {
+        //                var res = await _userService.RegisterUserWithConfirmToken(user, "student");
+        //                listRes.Add(res);
+        //            }
 
-                    return Ok(listRes);
-                }
+        //            return Ok(listRes);
+        //        }
 
-                //if(ext == ".xlsx")
-                //{
-                //    var workbook = new Workbook(usersFile.OpenReadStream());
+        //        //if(ext == ".xlsx")
+        //        //{
+        //        //    var workbook = new Workbook(usersFile.OpenReadStream());
 
-                //    using var csv = new CsvReader(workbook.SaveToStream(), CultureInfo.InvariantCulture);
-                //    var records = csv.GetRecords<RegisterUser>();
+        //        //    using var csv = new CsvReader(workbook.SaveToStream(), CultureInfo.InvariantCulture);
+        //        //    var records = csv.GetRecords<RegisterUser>();
 
-                //    var listRes = new List<Result>();
+        //        //    var listRes = new List<Result>();
 
-                //    foreach (var user in records)
-                //    {
-                //        var res = await _userService.RegisterUserWithConfirmToken(user);
-                //        listRes.Add(res);
-                //    }
+        //        //    foreach (var user in records)
+        //        //    {
+        //        //        var res = await _userService.RegisterUserWithConfirmToken(user);
+        //        //        listRes.Add(res);
+        //        //    }
 
-                //    return Ok(listRes);
-                //}
+        //        //    return Ok(listRes);
+        //        //}
 
-                return BadRequest(new Result()
-                {
-                    Status = false,
-                    Message = "Invalid file exctention"
-                });
-            }
-            catch(Exception ex)
-            {
-                return BadRequest(new Result()
-                {
-                    Status = false,
-                    Message = ex.Message.ToString()
-                });
-            }
-        }
+        //        return BadRequest(new Result()
+        //        {
+        //            Status = false,
+        //            Message = "Invalid file exctention"
+        //        });
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        return BadRequest(new Result()
+        //        {
+        //            Status = false,
+        //            Message = ex.Message.ToString()
+        //        });
+        //    }
+        //}
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
-            Policy = "AddDeleteEdit_User")]
-        [HttpPost("RegisterUser")]
-        public async Task<IActionResult> RegisterUserAPI(UpdateUser registerUser)
-        {
-            var reg = new RegisterUser()
-            {
-                Email = registerUser.email,
-                FirstName = registerUser.firstName,
-                LastName = registerUser.lastName,
-                City = registerUser.City,
-                Country = registerUser.country,
-                AcademicYear = registerUser.academicYear,
-                Gender = registerUser.Gender,
-                PhoneNumber = registerUser.Gender
-            };
-            var res = await _userService.RegisterUserWithConfirmToken(reg, registerUser.Role);
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+        //    Policy = "AddDeleteEdit_User")]
+        //[HttpPost("RegisterUser")]
+        //public async Task<IActionResult> RegisterUserAPI(UpdateUser registerUser)
+        //{
+        //    var reg = new RegisterUser()
+        //    {
+        //        Email = registerUser.email,
+        //        FirstName = registerUser.firstName,
+        //        LastName = registerUser.lastName,
+        //        City = registerUser.City,
+        //        Country = registerUser.country,
+        //        AcademicYear = registerUser.academicYear,
+        //        Gender = registerUser.Gender,
+        //        PhoneNumber = registerUser.Gender
+        //    };
+        //    var res = await _userService.RegisterUserWithConfirmToken(reg, registerUser.Role);
             
-            return CheckResult(res);
-        }
+        //    return CheckResult(res);
+        //}
 
-        [HttpPost("SignUp")]
-        public async Task<IActionResult> SingUp(SignUp signUp)
+        [HttpPost]
+        public async Task<IActionResult> SingUp(RegisterUser signUp)
         {
             if(ModelState.IsValid)
             {
@@ -132,15 +132,15 @@ namespace LLS.API.Controllers
         }
 
         //To Do remove email and make it with JWT only
-        [HttpGet("email")]
-        public async Task<IActionResult> GetUserByEmail(string email)
-        {
-            var res = await _userService.GetUserByEmail(email);
+        //[HttpGet("email")]
+        //public async Task<IActionResult> GetUserByEmail(string email)
+        //{
+        //    var res = await _userService.GetUserByEmail(email);
 
-            return CheckResult(res);
-        }
+        //    return CheckResult(res);
+        //}
 
-        [HttpGet("{userIdd}")]
+        [HttpGet("{idd}")]
         public async Task<IActionResult> GetUserByIdd(Guid userIdd)
         {
             var res = await _userService.GetUserByIdd(userIdd);
@@ -149,16 +149,16 @@ namespace LLS.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUser(Guid courseIdd)
+        public async Task<IActionResult> GetAllUser(Guid courseIdd,[FromQuery] int page, [FromQuery] string role)
         {
-            var res = await _userService.GetAllUsers(courseIdd);
+            var res = await _userService.GetAllUsers(courseIdd, page-1, role);
 
             return CheckResult(res);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "AddDeleteEdit_User")]
-        [HttpDelete("Delete")]
+        [HttpDelete("{idd}")]
         public async Task<IActionResult> DeleteUser(Guid userIdd)
         {
             var res = await _userService.DeleteUser(userIdd);
@@ -168,7 +168,7 @@ namespace LLS.API.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "AddDeleteEdit_User")]
-        [HttpPut("{idd}/Update")]
+        [HttpPut("{idd}")]
         public async Task<IActionResult> UpdateUser(Guid idd,UpdateUser updateUser)
         {
             var userDto = new UserDto()
@@ -189,26 +189,15 @@ namespace LLS.API.Controllers
             return CheckResult(res);
         }
 
-        [HttpGet("Get-All-Users-With-Role")]
-        public async Task<IActionResult> GetAllUsersWithRole(string role)
-        {
-            var res = await _userService.GetAllUserWithRole(role);
+        //[HttpGet("Get-All-Users-With-Role")]
+        //public async Task<IActionResult> GetAllUsersWithRole(string role)
+        //{
+        //    var res = await _userService.GetAllUserWithRole(role);
 
-            return CheckResult(res);
-        }
+        //    return CheckResult(res);
+        //}
     }
 
-    public class UpdateUser
-    {
-        public string email { get; set; }
-        public string firstName { get; set; }
-        public string lastName { get; set; }
-        public string phoneNumber { get; set; }
-        public string country { get; set; }
-        public string academicYear { get; set; }
-        public string City { get; set; }
-        public string Gender { get; set; }
-        public string Role { get; set; }
-    }
+    
 
 }

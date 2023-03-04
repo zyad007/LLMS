@@ -29,9 +29,9 @@ namespace LLS.API.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAllExp()
+        public async Task<IActionResult> GetAllExp([FromQuery] int page)
         {
-            var res = await _experimentService.GetAllExp();
+            var res = await _experimentService.GetAllExp(page - 1);
             return CheckResult(res);
         }
 
@@ -44,8 +44,8 @@ namespace LLS.API.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "AddDeleteEdit_Exp")]
-        [HttpPost("Create")]
-        public async Task<IActionResult> CreateExp([FromBody]CreateExp create) 
+        [HttpPost]
+        public async Task<IActionResult> CreateExp([FromBody] CreateExp create)
         {
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             var userEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
@@ -63,7 +63,7 @@ namespace LLS.API.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "AddDeleteEdit_Exp")]
-        [HttpPost("CreateLLO")]
+        [HttpPost("{idd}/LLO")]
         public async Task<IActionResult> CreateLLO(Guid idd, LLO llo)
         {
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -73,7 +73,7 @@ namespace LLS.API.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "AddDeleteEdit_Exp")]
-        [HttpPut("{idd}/EditLLO")]
+        [HttpPut("{idd}/LLO")]
         public async Task<IActionResult> EditLLO(Guid idd, LLO llo)
         {
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -91,7 +91,7 @@ namespace LLS.API.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "AddDeleteEdit_Exp")]
-        [HttpDelete("Delete")]
+        [HttpDelete("{idd}")]
         public async Task<IActionResult> DeleteExp(Guid idd)
         {
             var res = await _experimentService.DeleteExp(idd);
@@ -100,7 +100,7 @@ namespace LLS.API.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
             Policy = "AddDeleteEdit_Exp")]
-        [HttpPut("{idd}/Update")]
+        [HttpPut("{idd}")]
         public async Task<IActionResult> UpdateExp(Guid idd,[FromBody]CreateExp expUpdate)
         {
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -117,30 +117,30 @@ namespace LLS.API.Controllers
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
-            Policy = "AddDeleteEdit_Exp")]
-        [HttpPost("{idd}/Add-Resources")]
-        public async Task<IActionResult> AddResources(Guid idd,[FromBody] List<Guid> resIdds)
-        {
-            var result = await _experimentService.AddRecources(resIdds, idd);
-            return CheckResult(result);
-        }
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+        //    Policy = "AddDeleteEdit_Exp")]
+        //[HttpPost("{idd}/Add-Resources")]
+        //public async Task<IActionResult> AddResources(Guid idd,[FromBody] List<Guid> resIdds)
+        //{
+        //    var result = await _experimentService.AddRecources(resIdds, idd);
+        //    return CheckResult(result);
+        //}
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
-            Policy = "AddDeleteEdit_Exp")]
-        [HttpDelete("{idd}/Remove-Resource")]
-        public async Task<IActionResult> RemoveResources(Guid idd, Guid resIdd)
-        {
-            var result = await _experimentService.RemoveRecource(idd, resIdd);
-            return CheckResult(result);
-        }
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+        //    Policy = "AddDeleteEdit_Exp")]
+        //[HttpDelete("{idd}/Remove-Resource")]
+        //public async Task<IActionResult> RemoveResources(Guid idd, Guid resIdd)
+        //{
+        //    var result = await _experimentService.RemoveRecource(idd, resIdd);
+        //    return CheckResult(result);
+        //}
 
-        [HttpGet("{idd}/Get-Resource")]
-        public async Task<IActionResult> GetResources(Guid idd)
-        {
-            var result = await _experimentService.GetResource(idd);
-            return CheckResult(result);
-        }
+        //[HttpGet("{idd}/Get-Resource")]
+        //public async Task<IActionResult> GetResources(Guid idd)
+        //{
+        //    var result = await _experimentService.GetResource(idd);
+        //    return CheckResult(result);
+        //}
     }
 
     public class CreateExp

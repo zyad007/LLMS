@@ -55,7 +55,8 @@ namespace LLS.BLL.Services
                 Description = expDto.Description,
                 Idd = expDto.Idd,
                 AuthorId = userId,
-                AuthorName = expDto.AuthorName
+                AuthorName = expDto.AuthorName,
+                hasLLO = false
             };
 
             var result = await _unitOfWork.Experiments.Create(exp);
@@ -100,9 +101,19 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> GetAllExp()
+        public async Task<Result> GetAllExp(int page)
         {
-            var exps = await _unitOfWork.Experiments.GetAllExps();
+            if (page == -1)
+            {
+                page = 0;
+            }
+
+            //var exps = await _unitOfWork.Experiments.GetAllExps();
+
+            int count = _context.Expirments.Count();
+
+            var exps = _context.Expirments.Skip(page*10).Take(10).ToList();
+
             var expsDto = new List<ExpDto>();
 
             foreach (var exp in exps)
@@ -116,10 +127,17 @@ namespace LLS.BLL.Services
                 expsDto.Add(expDto);
             }
 
+
             return new Result()
             {
                 Status = true,
-                Data = expsDto
+                Data = new
+                {
+                    result = expsDto,
+                    count,
+                    next = (page*10)+10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Experiment?page={page+1+1}",
+                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Experiment?page={page-1+1}"
+                }
             };
         }
 
@@ -139,9 +157,13 @@ namespace LLS.BLL.Services
 
             if (!exp.Active)
             {
-                var course = await _context.Exp_Courses.Where(x => x.ExperimentId == exp.Id).Select(x=>x.Course).FirstOrDefaultAsync();
-                expDto.CourseIdd = course.Idd;
-                expDto.CourseName = course.Name;
+                var exp_Courses = _context.Exp_Courses.FirstOrDefault(x=>x.ExperimentId == exp.Id);
+                if(exp_Courses != null)
+                {
+                    var course = _context.Courses.FirstOrDefault(x => x.Id == exp_Courses.CourseId);
+                    expDto.CourseIdd = course.Idd;
+                    expDto.CourseName = course.Name;
+                }
             }
 
             return new Result()
@@ -197,6 +219,7 @@ namespace LLS.BLL.Services
 
                 return new Result()
                 {
+                    Data = _iMapper.Map<ExpDto>(expCopy),
                     Status = true,
                     Message = "A new Copy Added Successfully"
                 };
@@ -210,6 +233,7 @@ namespace LLS.BLL.Services
 
                 return new Result()
                 {
+                    Data = _iMapper.Map<ExpDto>(ex),
                     Status = true,
                     Message = "Updated Successfully"
                 };
@@ -248,6 +272,8 @@ namespace LLS.BLL.Services
             }
 
             FetchDtoIntoLLO(exp, llo);
+
+            exp.hasLLO = true;
 
             await _unitOfWork.Experiments.Update(exp);
             await _unitOfWork.SaveAsync();

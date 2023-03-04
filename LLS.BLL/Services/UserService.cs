@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,27 +42,16 @@ namespace LLS.BLL.Services
 
 
 
-        public async Task<Result> AddUser(SignUp signUp)
+        public async Task<Result> AddUser(RegisterUser user)
         {
             //Check if Email already Exisit
-            var userExist = await _unitOfWork.Users.GetByEmail(signUp.Email);
+            var userExist = await _unitOfWork.Users.GetByEmail(user.Email);
 
             if (userExist != null) //Email exists
             {
                 return new Result()
                 {
-                    Status = false,
-                    Message = "Email already in use"
-                };
-            }
-
-            //Check if Role Exist
-            var roleExist = await _roleManager.RoleExistsAsync(signUp.Role);
-            if (!roleExist)
-            {
-                return new Result()
-                {
-                    Message = "Role does not exist",
+                    Message = $"[{user.Email}]: Email already in use",
                     Status = false
                 };
             }
@@ -69,51 +59,43 @@ namespace LLS.BLL.Services
             //Add the user
             var newUser = new IdentityUser()
             {
-                Email = signUp.Email,
-                UserName = signUp.Email,
-                EmailConfirmed = false //To Update to confirm email
+                Email = user.Email,
+                UserName = user.Email,
+                EmailConfirmed = false // To be changed to confirmed by email
             };
 
-            var isCreated = await _userManager.CreateAsync(newUser, signUp.Password);
+            var isCreated = await _userManager.CreateAsync(newUser);
             if (!isCreated.Succeeded)
             {
                 return new Result()
                 {
-                    Status = false,
-                    Message = isCreated.Errors.Select(x => x.Description).ToList()
+                    Message = $"[{user.Email}]: {isCreated.Errors.FirstOrDefault().Description}",
+                    Status = false
                 };
             }
 
             //Add user to Db
-            var user = new User();
-            user.IdentityId = new Guid(newUser.Id);
-            user.FirstName = signUp.FirstName;
-            user.Lastname = signUp.LastName;
-            user.Email = signUp.Email;
+            var userDb = new User();
+            userDb.IdentityId = new Guid(newUser.Id);
+            userDb.FirstName = user.FirstName;
+            userDb.Lastname = user.LastName;
+            userDb.Country = user.Country;
+            userDb.PhoneNumber = user.PhoneNumber;
+            userDb.AcademicYear = user.AcademicYear;
+            userDb.Gender = user.Gender;
+            userDb.City = user.City;
+            userDb.Email = user.Email;
+            var exist = await _roleManager.FindByNameAsync(user.Role);
+            if (exist != null) userDb.Role = user.Role.ToUpper();
 
-            var result = await _unitOfWork.Users.Create(user);
+            var result = await _unitOfWork.Users.Create(userDb);
 
+            var idUser = await _userManager.FindByEmailAsync(userDb.Email);
 
-            //Add Role to User
-            var role = await _roleManager.FindByNameAsync(signUp.Role.ToLower());
-            if(role == null)
-            {
-                return new Result()
-                {
-                    Status = false,
-                    Message = "Role doesn't exist"
-                };
-            }
+            //var token = await _userManager.GenerateEmailConfirmationTokenAsync(idUser);
 
-            var roleResult = await _unitOfWork.Roles.AddUserToRole(new Guid(role.Id), signUp.Email);
-            if (roleResult.Status == false)
-            {
-                return new Result()
-                {
-                    Status = false,
-                    Message = roleResult.Message
-                };
-            }
+            var exists = await _roleManager.FindByNameAsync(user.Role);
+            if (exists != null) await _userManager.AddToRoleAsync(idUser, user.Role);
 
             await _unitOfWork.SaveAsync();
 
@@ -242,8 +224,13 @@ namespace LLS.BLL.Services
             return await _accountService.Login(new Login { Email = email, Password = password });
         }
 
-        public async Task<Result> GetAllUsers(Guid courseIdd)
+        public async Task<Result> GetAllUsers(Guid courseIdd, int page, string role)
         {
+            if (page == -1)
+            {
+                page = 0;
+            }
+
             var users = await _unitOfWork.Users.GetAll();
 
             var filterdUser = new List<User>();
@@ -279,10 +266,22 @@ namespace LLS.BLL.Services
                 var userDto = _iMapper.Map<UserDto>(user);
                 usersDto.Add(userDto);
             }
+            
+            if(!String.IsNullOrEmpty(role)) usersDto = usersDto.Where(x => x.Role.ToLower() == role.ToLower()).ToList();
+
+            var paginUsers = usersDto.Skip(page * 10).Take(10).ToList();
+            int count = usersDto.Count;
+
 
             return new Result()
             {
-                Data = usersDto,
+                Data = new
+                {
+                    result = paginUsers,
+                    count,
+                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/User?courseIdd={courseIdd}&page={page + 1+1}",
+                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/User?courseIdd={courseIdd}&page={page - 1+1}"
+                },
                 Status = true
             };
         }
@@ -433,6 +432,8 @@ namespace LLS.BLL.Services
             public string AcademicYear { get; set; }
             public string City { get; set; }
             public string Gender { get; set; }
+            public string Role { get; set; }
+            public string Password { get; set; }
         }
     }
 }

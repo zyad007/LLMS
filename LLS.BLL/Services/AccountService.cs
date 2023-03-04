@@ -281,6 +281,7 @@ namespace LLS.BLL.Services
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, userDb.Role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // id for Token used for refresh token
                 new Claim("fullName", userDb.FirstName + " " + userDb.Lastname)
             };

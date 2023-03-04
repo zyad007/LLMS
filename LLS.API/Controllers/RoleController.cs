@@ -37,64 +37,64 @@ namespace LLS.API.Controllers
             _mapper = mapper;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("Get-Info")]
-        public async Task<IActionResult> GetUserInfo()
-        {
-            var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //[HttpGet("Get-Info")]
+        //public async Task<IActionResult> GetUserInfo()
+        //{
+        //    var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            if(userId == null)
-            {
-                return BadRequest(new Result()
-                {
-                    Message = "Invalid Payload",
-                    Status = false
-                });
-            }
+        //    if(userId == null)
+        //    {
+        //        return BadRequest(new Result()
+        //        {
+        //            Message = "Invalid Payload",
+        //            Status = false
+        //        });
+        //    }
 
-            var user = _context.Users.FirstOrDefault(x => x.IdentityId.ToString() == userId);
+        //    var user = _context.Users.FirstOrDefault(x => x.IdentityId.ToString() == userId);
 
-            if (user == null)
-            {
-                return BadRequest(new Result()
-                {
-                    Message = "User not found",
-                    Status = false
-                });
-            }
+        //    if (user == null)
+        //    {
+        //        return BadRequest(new Result()
+        //        {
+        //            Message = "User not found",
+        //            Status = false
+        //        });
+        //    }
 
-            var userDto = _mapper.Map<UserDto>(user);
+        //    var userDto = _mapper.Map<UserDto>(user);
 
-            if (user.Role.ToLower() == "user")
-            {
-                return Ok(new Result()
-                {
-                    Data = new { User = userDto },
-                    Message = "User Have no Permission",
-                    Status = true
-                });
-            }
+        //    if (user.Role.ToLower() == "user")
+        //    {
+        //        return Ok(new Result()
+        //        {
+        //            Data = new { User = userDto },
+        //            Message = "User Have no Permission",
+        //            Status = true
+        //        });
+        //    }
 
-            var role = await _roleManager.FindByNameAsync(user.Role);
+        //    var role = await _roleManager.FindByNameAsync(user.Role);
 
-            var result = await _roleManager.GetClaimsAsync(role);
-            var perms = new List<string>();
-            if (result != null)
-            {
-                perms = result.Select(x => x.Value).ToList();
-            }
+        //    var result = await _roleManager.GetClaimsAsync(role);
+        //    var perms = new List<string>();
+        //    if (result != null)
+        //    {
+        //        perms = result.Select(x => x.Value).ToList();
+        //    }
 
             
 
-            return Ok(new Result()
-            {
-                Data = new { User = userDto, Permission = perms},
-                Status = true
-            });
-        }
+        //    return Ok(new Result()
+        //    {
+        //        Data = new { User = userDto, Permission = perms},
+        //        Status = true
+        //    });
+        //}
 
 
-        [HttpPost("Create")]
+        [HttpPost]
         public async Task<IActionResult> AddRole(Role role)
         {
             var result = await _unitOfWork.Roles.AddRole(role.Name);
@@ -116,7 +116,7 @@ namespace LLS.API.Controllers
             });
         }
 
-        [HttpPut("{idd}/Update")]
+        [HttpPut("{idd}")]
         public async Task<IActionResult> UpdateRole(Guid idd, Role roleUpdate)
         {
             var role = await _roleManager.FindByIdAsync(idd.ToString());
@@ -250,7 +250,7 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
-        [HttpPost("{idd}/Assign")]
+        [HttpPost("{idd}/{userIdd}")]
         public async Task<IActionResult> AddUserToRole(Guid idd, Guid userIdd)
         {
             var user = await _unitOfWork.Users.GetByIdd(userIdd);
@@ -260,7 +260,7 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
-        [HttpDelete("{idd}/Remove")]
+        [HttpDelete("{idd}/{userIdd}")]
         public async Task<IActionResult> RemoveRoleFromUser(Guid idd, Guid userIdd)
         {
             var user = await _unitOfWork.Users.GetByIdd(userIdd);
@@ -270,7 +270,7 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
-        [HttpDelete("{idd}/Delete")]
+        [HttpDelete("{idd}")]
         public async Task<IActionResult> DeleteRole(Guid idd)
         {
             var result = await _unitOfWork.Roles.DeleteRole(idd);

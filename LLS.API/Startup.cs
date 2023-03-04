@@ -40,6 +40,7 @@ namespace LLS.API
         {
             services.Configure<JwtConfig>(Configuration.GetSection("JwtConfig"));
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.Configure<VrlRoot>(Configuration.GetSection("vrlRoot"));
 
             services.AddControllers().AddJsonOptions(options =>
             {

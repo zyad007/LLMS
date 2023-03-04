@@ -10,7 +10,7 @@ namespace LLS.Common.Models.LLO.Pages.Blocks.Config
 {
     public class Configs
     {
-        public Grading? Grading { get; set; }
+        public string? Grading { get; set; }
         public int? AnsweringTime { get; set; }
         public int? NumberOfTrials { get; set; }
         public bool? ShowCorrectAnswer { get; set; }

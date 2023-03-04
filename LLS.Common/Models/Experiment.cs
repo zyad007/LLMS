@@ -20,6 +20,7 @@ namespace LLS.Common.Models
         public string LLO_MA {get; set;}    //LLO Model Answer
         public string LLO_SA { get; set; }  //LLO Student Answer
         public string Description { get; set; } 
+        public bool hasLLO { get; set; }
 
         //Assigned Courses for this Expirment
         public List<Exp_Course> Exp_Courses { get; set; }

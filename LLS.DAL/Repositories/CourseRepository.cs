@@ -22,7 +22,6 @@ namespace LLS.DAL.Repositories
             return await _set.FirstOrDefaultAsync(x => x.Idd == idd);
         }
 
-        
 
         public async Task Update(Course course)
         {
