@@ -25,6 +25,8 @@ namespace LLS.Common.Models
 
         public string Role { get; set; }
 
+        public DateTime Update { get; set; }
+
         //Realtion
         public List<StudentCourse_ExpCourse> StudentCourse_ExpCourses { get; set; }
     }

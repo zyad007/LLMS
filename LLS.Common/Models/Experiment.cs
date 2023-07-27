@@ -19,7 +19,8 @@ namespace LLS.Common.Models
         public string LLO { get; set; }     //LLO Default no socre
         public string LLO_MA {get; set;}    //LLO Model Answer
         public string LLO_SA { get; set; }  //LLO Student Answer
-        public string Description { get; set; } 
+        public string Description { get; set; }
+        public string RelatedCourse { get; set; }
         public bool hasLLO { get; set; }
 
         //Assigned Courses for this Expirment

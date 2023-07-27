@@ -15,11 +15,19 @@ namespace LLS.Common.Dto
         public string AuthorName { get; set; }
         public LLO LLO { get; set; }
         public string Description { get; set; }
+        public string RelatedCourse { get; set; }
         public string CourseName { get; set; }
-        public Guid CourseIdd { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public DateTime UpdateDate { get; set; }
-        public bool hasLLO { get; set; }
+        public Guid? CourseIdd { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public DateTime? ReservedAt { get; set; }
+        public DateTime? UpdateDate { get; set; }
+        public bool? hasLLO { get; set; }
+        public bool? Editable { get; set; }
+        public string Status { get; set; }
+        public string FeedBack { get; set; }
+        public float? Grade { get; set; }
+        public string SubmitedAt { get; set; }
+        public bool? isAvailable { get; set; }
     }
 }

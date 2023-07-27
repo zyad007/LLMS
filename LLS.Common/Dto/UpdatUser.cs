@@ -8,7 +8,6 @@ namespace LLS.Common.Dto
 {
     public class UpdateUser
     {
-        public string email { get; set; }
         public string firstName { get; set; }
         public string lastName { get; set; }
         public string phoneNumber { get; set; }
@@ -17,5 +16,6 @@ namespace LLS.Common.Dto
         public string City { get; set; }
         public string Gender { get; set; }
         public string Role { get; set; }
+        public string ImgURL { get; set; }
     }
 }

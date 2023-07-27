@@ -30,8 +30,11 @@ namespace LLS.BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<Result> GetCourses(Guid userIdd, int page, bool isTeacher)
+        public async Task<Result> GetCourses(Guid userIdd, int page, bool isTeacher, string searchByName, string searchByCode)
         {
+            searchByName += "";
+            searchByCode += "";
+
             if (page == -1)
             {
                 page = 0;
@@ -57,11 +60,15 @@ namespace LLS.BLL.Services
             //    };
             //}
 
-            var courses = _context.User_Courses.Where(x => x.UserId == user.Id && x.Role == "teacher").Select(x=>x.Course).ToList();
+            var courses = _context.User_Courses
+                .Where(x => x.UserId == user.Id && x.Role == "teacher")
+                .Select(x=>x.Course).Where(x=>x.Name.ToLower().Contains("" + searchByName.ToLower()) && x.Code.ToLower().Contains("" + searchByCode.ToLower())).ToList();
+
 
             var count = courses.Count;
 
             var pagedCourse = courses.Skip(page * 10).Take(10).ToList();
+            
 
             var coursesDto = new List<CourseDto>();
             foreach (var course in pagedCourse)
@@ -86,15 +93,17 @@ namespace LLS.BLL.Services
                 {
                     result = coursesDto,
                     count,
-                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page{path}?page={page + 1 + 1}",
-                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page{path}?page={page - 1 + 1}"
+                    next = (page * 10) + 10 >= count ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page{path}?page={page + 1 + 1}",
+                    previous = page == 0 ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page{path}?page={page - 1 + 1}"
                 },
                 Status = true
             };
         }
 
-        public async Task<Result> getExps(Guid teacherId, Guid courseIdd, int page)
+        public async Task<Result> getExps(Guid teacherId, Guid courseIdd, int page, string search)
         {
+            search += "";
+
             if (page == -1)
             {
                 page = 0;
@@ -131,9 +140,11 @@ namespace LLS.BLL.Services
             }
 
             var exps = _context.Exp_Courses.Where(x => x.CourseId == courseIdd).Select(x => x.Experiment).ToList();
-            var count = exps.Count;
+            
+            var searchedExps = exps.Where(x => x.Name.ToLower().Contains("" + search.ToLower())).ToList();
+            var count = searchedExps.Count;
 
-            var expsPaged = exps.Skip(page * 10).Take(10).ToList();
+            var expsPaged = searchedExps.Skip(page * 10).Take(10).ToList();
 
 
             var expDtos = new List<ExpDto>();
@@ -149,15 +160,17 @@ namespace LLS.BLL.Services
                 {
                     result = expDtos,
                     count,
-                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments?page={page + 1 + 1}",
-                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments?page={page - 1 + 1}"
+                    next = (page * 10) + 10 >= count ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments?page={page + 1 + 1}",
+                    previous = page == 0 ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments?page={page - 1 + 1}"
                 },
                 Status = true
             };
         }
 
-        public async Task<Result> GetGradeBookForExp(Guid userId, Guid courseIdd, Guid expIdd, int page)
+        public async Task<Result> GetGradeBookForExp(Guid userId, Guid courseIdd, Guid expIdd, int page, string search)
         {
+            search += "";
+
             if (page == -1)
             {
                 page = 0;
@@ -224,7 +237,8 @@ namespace LLS.BLL.Services
             }
 
 
-            var student_expsCourse = _context.StudentCourse_ExpCourses.Where(x => x.Exp_CourseId == expCourse.Id).ToList();
+            var student_expsCourse = _context.StudentCourse_ExpCourses
+                .Where(x => x.Exp_CourseId == expCourse.Id && x.Student_Course.User.Email.ToLower().Contains(""+search.ToLower())).ToList();
             var count = student_expsCourse.Count;
 
             var student_expsCoursePaged = student_expsCourse.Skip(page * 10).Take(10).ToList();
@@ -237,11 +251,15 @@ namespace LLS.BLL.Services
                     {
                         x.Id,
                         x.NumberOfTials,
-                        _context.Users.FirstOrDefault(z => z.Id == _context.User_Courses.FirstOrDefault(y => y.Id == x.Student_CourseId).UserId).Email
+                        _context.Users.FirstOrDefault(z => z.Id == _context.User_Courses.FirstOrDefault(y => y.Id == x.Student_CourseId).UserId).Email,
+                        Name = _context.Users.FirstOrDefault(z => z.Id == _context.User_Courses.FirstOrDefault(y => y.Id == x.Student_CourseId).UserId).FirstName + 
+                        " " + _context.Users.FirstOrDefault(z => z.Id == _context.User_Courses.FirstOrDefault(y => y.Id == x.Student_CourseId).UserId).Lastname,
+                        x.FinalGrade,
+                        x.feedback
                     }).ToList(),
                     count,
-                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments/{expIdd}/Grade-Books?page={page + 1 + 1}",
-                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments/{expIdd}/Grade-Books?page={page - 1 + 1}"
+                    next = (page * 10) + 10 >= count ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments/{expIdd}/Grade-Books?page={page + 1 + 1}",
+                    previous = page == 0 ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments/{expIdd}/Grade-Books?page={page - 1 + 1}"
                 },
                 Status = true
             };
@@ -305,8 +323,8 @@ namespace LLS.BLL.Services
                         x.Status
                     }).ToList(),
                     count,
-                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments/{expIdd}/Grade-Books/{studentCourseExpId}/Trials?page={page + 1 + 1}",
-                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments/{expIdd}/Grade-Books/{studentCourseExpId}/Trials?page={page - 1 + 1}"
+                    next = (page * 10) + 10 >= count ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments/{expIdd}/Grade-Books/{studentCourseExpId}/Trials?page={page + 1 + 1}",
+                    previous = page == 0 ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Teacher/Courses/{courseIdd}/Experiments/{expIdd}/Grade-Books/{studentCourseExpId}/Trials?page={page - 1 + 1}"
                 },
                 Status = true
             };
@@ -403,7 +421,7 @@ namespace LLS.BLL.Services
 
         }
 
-        public async Task<Result> GradeStudentTrial(Guid teacherId , Guid trialId, LLO lro)
+        public async Task<Result> GradeStudentTrial(Guid teacherId , Guid trialId, LLO lro, string feedback)
         {
             var user = _context.Users.FirstOrDefault(x => x.IdentityId == teacherId);
             if (user == null)
@@ -435,10 +453,47 @@ namespace LLS.BLL.Services
                 };
             }
 
+            float totalGrade = 0;
+
+            for (int sec = 0; sec < lro.Sections.Count; sec++)
+            {
+                for (int q = 0; q < lro.Sections[sec].Column1.Count; q++)
+                {
+                    if (lro.Sections[sec].Column1[q].MainType == Common.Enums.MainType.QUESTION)
+                    {
+                        totalGrade += lro.Sections[sec].Column1[q].StudentScore;
+                    }
+                }
+
+                for (int q = 0; q < lro.Sections[sec].Column2.Count; q++)
+                {
+                    if (lro.Sections[sec].Column2[q].MainType == Common.Enums.MainType.QUESTION)
+                    {
+                        totalGrade += lro.Sections[sec].Column1[q].StudentScore;
+                    }
+                }
+
+                for (int q = 0; q < lro.Sections[sec].Column3.Count; q++)
+                {
+                    if (lro.Sections[sec].Column3[q].MainType == Common.Enums.MainType.QUESTION)
+                    {
+                        totalGrade += lro.Sections[sec].Column1[q].StudentScore;
+                    }
+                }
+            }
+
+
             trial.Status = "graded";
             trial.IsGraded = true;
+            trial.TotalScore= totalGrade;
 
             trial.LRO = JsonConvert.SerializeObject(lro);
+
+            var studentExpCourse = _context.Trials.Where(x=>x.Id == trial.Id).Select(x=>x.StudentCourse_ExpCourse).FirstOrDefault();
+            studentExpCourse.FinalGrade = totalGrade;
+            studentExpCourse.feedback = feedback;
+            studentExpCourse.Status = "Graded";
+            studentExpCourse.IsCompleted = true;
 
             await _unitOfWork.SaveAsync();
 

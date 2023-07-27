@@ -10,6 +10,7 @@ namespace LLS.DAL.Interfaces
     public interface IRoleRepository
     {
         Task<Result> AddRole(string roleName);
+        Task<Result> GetAllUsers(int page, string search);
         Task<Result> GetAllUsers();
         Task<Result> AddUserToRole(Guid idd, string email);
         Task<Result> GetUserRoles(string email);

@@ -20,6 +20,8 @@ namespace LLS.Common.Models.LLO.Pages.Blocks
         public Score Score { get; set; }
         public Score StudentAnswers { get; set; }
         public float StudentScore { get; set; }
+        public float avg { get; set; }
+        public string feedBack { get; set; }
 
     }
 }

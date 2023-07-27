@@ -11,16 +11,15 @@ namespace LLS.BLL.IServices
 {
     public interface IStudentService
     {
-        Task<Result> GetAssignedExpForStudent(string email, int page);
-        Task<Result> GetStudentCourses(string email, int page);
-        Task<Result> SubmitExp(StudentSubmit submit, string email);
-        Task<Result> GetCompletedExp(string email, int page);
+        Task<Result> GetAssignedExpForStudent(string email, int page, string searchByName, string searchByCourseName);
+        Task<Result> GetStudentCourses(string email, int page, string searchByName, string searchByCode);
+        Task<Result> GetCompletedExp(string email, int page,string searchByName, string searchByCourseName);
         //Task<Result> GetStudentResult(string email, string courseIdd, Guid expIdd);
         //Task<Result> ReserveTimeSlot(string email, Guid expIdd, string courseIdd, int timeSlot);
 
 
         //New
-        Task<Result> startTrial(Guid courseIdd, Guid expIdd, string studentId);
+        Task<Result> startTrial(Guid expIdd, string studentId);
         Task<Result> SubmitTrial(TrialSubmit submitTrial, string studentId);
     }
 }

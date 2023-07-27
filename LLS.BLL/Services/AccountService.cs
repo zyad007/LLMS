@@ -67,6 +67,10 @@ namespace LLS.BLL.Services
                 jwtToken.Role = user.Role;
                 jwtToken.Email = user.Email;
                 jwtToken.Idd = user.Idd;
+                jwtToken.Name = user.FirstName + " " + user.Lastname;
+                jwtToken.imageUrl = user.imgURL;
+                user.LastLogIn = DateTime.Now;
+                await _context.SaveChangesAsync();
                 return jwtToken;
             }
             else

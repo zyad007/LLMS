@@ -44,6 +44,18 @@ namespace LLS.BLL.Services
 
         public async Task<Result> AddUser(RegisterUser user)
         {
+            var passwordValidator = new PasswordValidator<IdentityUser>();
+            var passwRes = await passwordValidator.ValidateAsync(_userManager,null,user.Password);
+            if(!passwRes.Succeeded)
+            {
+                return new Result()
+                {
+                    Message = "Invalid Password",
+                    Status = false
+                };
+            }
+
+
             //Check if Email already Exisit
             var userExist = await _unitOfWork.Users.GetByEmail(user.Email);
 
@@ -85,6 +97,13 @@ namespace LLS.BLL.Services
             userDb.Gender = user.Gender;
             userDb.City = user.City;
             userDb.Email = user.Email;
+            userDb.imgURL = user.ImgURL;
+
+            if(String.IsNullOrEmpty(user.Role)) 
+            {
+                user.Role = "none";
+            }
+
             var exist = await _roleManager.FindByNameAsync(user.Role);
             if (exist != null) userDb.Role = user.Role.ToUpper();
 
@@ -92,6 +111,7 @@ namespace LLS.BLL.Services
 
             var idUser = await _userManager.FindByEmailAsync(userDb.Email);
 
+            await _userManager.AddPasswordAsync(idUser ,user.Password);
             //var token = await _userManager.GenerateEmailConfirmationTokenAsync(idUser);
 
             var exists = await _roleManager.FindByNameAsync(user.Role);
@@ -99,11 +119,14 @@ namespace LLS.BLL.Services
 
             await _unitOfWork.SaveAsync();
 
+            var userDto = _iMapper.Map<UserDto>(userDb);
+
+
             return new Result()
             {
                 Status = true,
                 Message = "User has been created Successfully",
-                Data = _iMapper.Map<UserDto>(user)
+                Data = userDto
             };
         }
         
@@ -224,8 +247,12 @@ namespace LLS.BLL.Services
             return await _accountService.Login(new Login { Email = email, Password = password });
         }
 
-        public async Task<Result> GetAllUsers(Guid courseIdd, int page, string role)
+        public async Task<Result> GetAllUsers(Guid courseIdd, int page, string role, string searchByEmail, string searchByFirstName, string searchByLastName)
         {
+            searchByEmail += "";
+            searchByFirstName += "";
+            searchByLastName += "";
+
             if (page == -1)
             {
                 page = 0;
@@ -269,8 +296,11 @@ namespace LLS.BLL.Services
             
             if(!String.IsNullOrEmpty(role)) usersDto = usersDto.Where(x => x.Role.ToLower() == role.ToLower()).ToList();
 
-            var paginUsers = usersDto.Skip(page * 10).Take(10).ToList();
-            int count = usersDto.Count;
+            var searchedUsers = usersDto.Where(x => x.Email.ToLower().Contains(""+searchByEmail.ToLower()) &&
+            x.FirstName.ToLower().Contains("" + searchByFirstName.ToLower()) &&
+            x.Lastname.ToLower().Contains("" + searchByLastName.ToLower())).ToList();
+            var paginUsers = searchedUsers.Skip(page * 10).Take(10).ToList();
+            int count = searchedUsers.Count;
 
 
             return new Result()
@@ -279,22 +309,22 @@ namespace LLS.BLL.Services
                 {
                     result = paginUsers,
                     count,
-                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/User?courseIdd={courseIdd}&page={page + 1+1}",
-                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/User?courseIdd={courseIdd}&page={page - 1+1}"
+                    next = (page * 10) + 10 >= count ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/User?courseIdd={courseIdd}&page={page + 1+1}",
+                    previous = page == 0 ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/User?courseIdd={courseIdd}&page={page - 1+1}"
                 },
                 Status = true
             };
         }
 
-        public async Task<Result> GetUserByEmail(string email)
+        public async Task<Result> GetUserByEmail(string idd)
         {
-            var user = await _unitOfWork.Users.GetByEmail(email);
+            var user = await _unitOfWork.Users.GetByEmail(idd);
             if(user == null)
             {
                 return new Result()
                 {
                     Status = false,
-                    Message = "No User doesn't exist"
+                    Message = "User doesn't exist"
                 };
             }
 
@@ -315,7 +345,7 @@ namespace LLS.BLL.Services
                 return new Result()
                 {
                     Status = false,
-                    Message = "No User doesn't exist"
+                    Message = "User doesn't exist"
                 };
             }
 
@@ -340,7 +370,14 @@ namespace LLS.BLL.Services
                 };
             }
 
+            var email = user.Email;
+
             _unitOfWork.Users.Delete(user);
+
+            var userI = await _userManager.FindByEmailAsync(email);
+
+            await _userManager.DeleteAsync(userI);
+
             await _unitOfWork.SaveAsync();
 
             return new Result()
@@ -364,31 +401,41 @@ namespace LLS.BLL.Services
 
             if(user.Role != userDto.Role)
             {
-                var role = await _roleManager.FindByNameAsync(userDto.Role);
-                if(role == null)
+                if(userDto.Role != "none")
                 {
-                    return new Result()
+                    var role = await _roleManager.FindByNameAsync(userDto.Role);
+                    if (role == null)
                     {
-                        Status = false,
-                        Message = "no role with this name"
-                    };
-                }
+                        return new Result()
+                        {
+                            Status = false,
+                            Message = "no role with this name"
+                        };
+                    }
 
-                var idUser = await _userManager.FindByEmailAsync(user.Email);
-                await _userManager.RemoveFromRoleAsync(idUser, user.Role);
-                await _userManager.AddToRoleAsync(idUser, userDto.Role);
+                    var idUser = await _userManager.FindByEmailAsync(user.Email);
+                    await _userManager.RemoveFromRoleAsync(idUser, user.Role);
+                    await _userManager.AddToRoleAsync(idUser, userDto.Role);
+                }else
+                {
+                    var idUser = await _userManager.FindByEmailAsync(user.Email);
+                    await _userManager.RemoveFromRoleAsync(idUser, user.Role);
+                }
             }
 
             var newUser = _iMapper.Map<User>(userDto);
 
             await _unitOfWork.Users.Update(newUser);
+
             await _unitOfWork.SaveAsync();
+
+            var userRes = await _unitOfWork.Users.GetByIdd(userDto.Idd);
 
             return new Result()
             {
                 Status = true,
                 Message = "User Updated Seuccessfully",
-                Data = userDto
+                Data = _iMapper.Map<UserDto>(userRes)
             };
         }
 
@@ -434,6 +481,7 @@ namespace LLS.BLL.Services
             public string Gender { get; set; }
             public string Role { get; set; }
             public string Password { get; set; }
+            public string ImgURL { get; set; }
         }
     }
 }

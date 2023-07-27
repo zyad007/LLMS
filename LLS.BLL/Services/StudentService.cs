@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,15 +31,117 @@ namespace LLS.BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<Result> GetAssignedExpForStudent(string email, int page)
+        //private async Task<Result> GetAssignedExpForStudentv2(string email, int page, string searchByName, string searchByCourseName)
+        //{
+        //    if (page == -1)
+        //    {
+        //        page = 0;
+        //    }
+
+        //    var user = await _unitOfWork.Users.GetByEmail(email);
+        //    if(user == null)
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "User doesn't exist",
+        //            Status = false
+        //        };
+        //    }
+
+        //    if(user.Role.ToLower() != "student")
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "User doesn't have Student Role",
+        //            Status = false
+        //        };
+        //    }
+
+        //    var user_Courses = await _context.User_Courses.Where(n => n.UserId == user.Id)
+        //                      .ToListAsync();
+
+        //    var Exp_Courses = new List<Exp_Course>();
+
+        //    foreach (var user_course in user_Courses)
+        //    {
+        //        var temp = await _context.StudentCourse_ExpCourses
+        //            .Where(x => !x.IsCompleted && x.Student_CourseId == user_course.Id)
+        //            .Select(x => x.Exp_Course).ToListAsync();
+        //        Exp_Courses.AddRange(temp);
+        //    }
+
+        //    try
+        //    {
+        //        if (!Exp_Courses.Any())
+        //        {
+        //            return new Result()
+        //            {
+        //                Message = "There is no assigned experiment",
+        //                Status = false
+        //            };
+        //        }
+        //    }
+        //    catch (ArgumentNullException)
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "There is no experiments assigned for user ex",
+        //            Status = false
+        //        };
+        //    }
+
+        //    var Exp_CooursesPaged = Exp_Courses.Skip(page * 10).Take(10).ToList();
+        //    var count = Exp_Courses.Count;
+
+        //    var expsDto = new List<ExpDto>();
+        //    foreach (var exp_course in Exp_CooursesPaged)
+        //    {
+        //        var exp = await _context.Expirments.FirstOrDefaultAsync(x => x.Id == exp_course.ExperimentId);
+        //        var course = await _context.Courses.FirstOrDefaultAsync(x => x.Id == exp_course.CourseId);
+
+        //        var expDto = new ExpDto()
+        //        {
+        //            Idd = exp.Idd,
+        //            Name = exp.Name,
+        //            Description = exp.Description,
+        //            AuthorName = exp.AuthorName,
+        //            CourseName = course.Name,
+        //            CourseIdd = course.Idd,
+        //            StartDate = exp_course.StartDate,
+        //            EndDate = exp_course.EndDate
+        //        };
+
+        //        expsDto.Add(expDto);
+        //    }
+
+
+        //    return new Result()
+        //    {
+        //        Data = new
+        //        {
+        //            result = expsDto.Where(x=>x.Name.Contains(""+searchByName) || x.CourseName.Contains(""+searchByCourseName)).ToList(),
+        //            count,
+        //            next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Student/Assigned-Experiments?page={page + 1 + 1}",
+        //            previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Student/Assigned-Experiments?page={page - 1 + 1}"
+        //        },
+        //        Status = true
+        //    };
+
+        //}
+
+        public async Task<Result> GetAssignedExpForStudent(string email, int page, string searchByName, string searchByCourseName)
         {
+            searchByName += "";
+            searchByCourseName += "";
+
             if (page == -1)
             {
                 page = 0;
             }
 
             var user = await _unitOfWork.Users.GetByEmail(email);
-            if(user == null)
+
+            if (user == null)
             {
                 return new Result()
                 {
@@ -47,7 +150,7 @@ namespace LLS.BLL.Services
                 };
             }
 
-            if(user.Role.ToLower() != "student")
+            if (user.Role.ToLower() != "student")
             {
                 return new Result()
                 {
@@ -56,78 +159,240 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var user_Courses = await _context.User_Courses.Where(n => n.UserId == user.Id)
-                              .ToListAsync();
-
-            var Exp_Courses = new List<Exp_Course>();
-
-            foreach (var user_course in user_Courses)
-            {
-                var temp = await _context.StudentCourse_ExpCourses.Where(x => !x.IsCompleted && x.Student_CourseId == user_course.Id)
-                                .Select(x => x.Exp_Course).ToListAsync();
-                Exp_Courses.AddRange(temp);
-            }
-
-            try
-            {
-                if (!Exp_Courses.Any())
+            var expDto = await _context.StudentCourse_ExpCourses
+                .Where( x => x.Student_Course.UserId == user.Id && !x.IsCompleted )
+                .Select(x=> new ExpDto()
                 {
-                    return new Result()
-                    {
-                        Message = "There is no assigned experiment",
-                        Status = false
-                    };
+                    Idd = x.Exp_Course.Experiment.Idd,
+                    Name = x.Exp_Course.Experiment.Name,
+                    CourseName = x.Exp_Course.Course.Name,
+                    ReservedAt = (x.StartFrom.ToString()==("0001-01-01 00:00:00")) ? null : x.StartFrom,
+                    Status = x.Status,
+                    //isAvailable = (x.StartFrom <= DateTime.Now.AddHours(2) && x.EndAt >= DateTime.Now.AddHours(2))
+                    isAvailable = x.Status == "Reserved"
+                })
+                .Where(x => x.Name.ToLower().Contains("" + searchByName.ToLower()) && x.CourseName.ToLower().Contains("" + searchByCourseName.ToLower()))
+                .ToListAsync();
+
+            var sortedList = new List<object>();
+
+            var i1 = new List<int>();
+            for (int i = 0; i < expDto.Count; i++)
+            {
+                if (expDto[i].isAvailable == true)
+                {
+                    sortedList.Add(expDto[i]);
+                    i1.Add(i);
                 }
             }
-            catch (ArgumentNullException)
+            for (int i = i1.Count - 1; i >= 0; i--)
             {
-                return new Result()
-                {
-                    Message = "There is no experiments assigned for user ex",
-                    Status = false
-                };
+                expDto.RemoveAt(i1[i]);
             }
 
-            var Exp_CooursesPaged = Exp_Courses.Skip(page * 10).Take(10).ToList();
-            var count = Exp_Courses.Count;
-
-            var expsDto = new List<ExpDto>();
-            foreach (var exp_course in Exp_CooursesPaged)
+            var i2 = new List<int>();
+            for (int i = 0; i < expDto.Count; i++)
             {
-                var exp = await _context.Expirments.FirstOrDefaultAsync(x => x.Id == exp_course.ExperimentId);
-                var course = await _context.Courses.FirstOrDefaultAsync(x => x.Id == exp_course.CourseId);
-                var expDto = new ExpDto()
+                if (expDto[i].Status == "Assinged")
                 {
-                    Idd = exp.Idd,
-                    Name = exp.Name,
-                    Description = exp.Description,
-                    AuthorName = exp.AuthorName,
-                    CourseName = course.Name,
-                    CourseIdd = course.Idd,
-                    StartDate = exp_course.StartDate,
-                    EndDate = exp_course.EndDate
-                };
-
-                expsDto.Add(expDto);
+                    sortedList.Add(expDto[i]);
+                    i2.Add(i);
+                }
+            }
+            for (int i = i2.Count - 1; i >= 0; i--)
+            {
+                expDto.RemoveAt(i2[i]);
             }
 
+            var i3 = new List<int>();
+            for (int i = 0; i < expDto.Count; i++)
+            {
+                if (expDto[i].Status == "Reserved")
+                {
+                    sortedList.Add(expDto[i]);
+                    i3.Add(i);
+                }
+            }
+            for (int i = i3.Count - 1; i >= 0; i--)
+            {
+                expDto.RemoveAt(i3[i]);
+            }
+
+            sortedList.AddRange(expDto);
+
+            var count = expDto.Count;
 
             return new Result()
             {
                 Data = new
                 {
-                    result = expsDto,
+                    result = sortedList.Skip(page * 10).Take(10).ToList(),
                     count,
-                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Student/Assigned-Experiments?page={page + 1 + 1}",
-                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Student/Assigned-Experiments?page={page - 1 + 1}"
+                    next = (page * 10) + 10 >= count ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Student/Assigned?page={page + 1 + 1}",
+                    previous = page == 0 ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Student/Assigned?page={page - 1 + 1}"
                 },
                 Status = true
             };
-
         }
 
-        public async Task<Result> GetCompletedExp(string email, int page)
+        //private async Task<Result> GetCompletedExpv2(string email, int page,string searchByName,string searchByCourseName)
+        //{
+        //    if (page == -1)
+        //    {
+        //        page = 0;
+        //    }
+
+        //    var user = await _unitOfWork.Users.GetByEmail(email);
+        //    if (user == null)
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "User doesn't exist",
+        //            Status = false
+        //        };
+        //    }
+
+        //    if (user.Role.ToLower() != "student")
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "User doesn't have Student Role",
+        //            Status = false
+        //        };
+        //    }
+
+        //    var user_Courses = await _context.User_Courses.Where(n => n.UserId == user.Id)
+        //                      .ToListAsync();
+
+        //    var Exp_Courses = new List<Exp_Course>();
+
+        //    foreach (var user_course in user_Courses)
+        //    {
+        //        var temp = await _context.StudentCourse_ExpCourses.Where(x => x.IsCompleted && x.Student_CourseId == user_course.Id)
+        //                        .Select(x => x.Exp_Course).ToListAsync();
+        //        Exp_Courses.AddRange(temp);
+        //    }
+
+        //    try { if (!Exp_Courses.Any())
+        //            {
+        //                return new Result()
+        //                {
+        //                    Message = "There is no completed experiment",
+        //                    Status = false
+        //                };
+        //            }
+        //    }
+        //    catch (ArgumentNullException)
+        //    {
+        //        return new Result()
+        //        {
+        //            Message = "There is no completed experiment ex",
+        //            Status = false
+        //        };
+        //    }
+
+        //    var Exp_CoursesPaged = Exp_Courses.Skip(page * 10).Take(10).ToList();
+        //    var count = Exp_Courses.Count;
+
+        //    var expsDto = new List<ExpDto>();
+        //    foreach (var exp_course in Exp_CoursesPaged)
+        //    {
+        //        var exp = await _context.Expirments.FirstOrDefaultAsync(x => x.Id == exp_course.ExperimentId);
+        //        var course = await _context.Courses.FirstOrDefaultAsync(x => x.Id == exp_course.CourseId);
+        //        var expDto = new ExpDto()
+        //        {
+        //            Name = exp.Name,
+        //            Description = exp.Description,
+        //            AuthorName = exp.AuthorName,
+        //            CourseName = course.Name,
+        //            CourseIdd = course.Idd,
+        //            StartDate = exp_course.StartDate,
+        //            EndDate = exp_course.EndDate
+        //        };
+
+        //        expsDto.Add(expDto);
+        //    }
+
+
+        //    return new Result()
+        //    {
+        //        Data = new
+        //        {
+        //            result = expsDto.Where(x => x.Name.Contains("" + searchByName) || x.CourseName.Contains("" + searchByCourseName)).ToList(),
+        //            count,
+        //            next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Student/Completed-Experiments?page={page + 1 + 1}",
+        //            previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Student/Completed-Experiments?page={page - 1 + 1}"
+        //        },
+        //        Status = true
+        //    };
+
+        //}
+
+        public async Task<Result> GetCompletedExp(string email, int page, string searchByName, string searchByCourseName)
         {
+            searchByName += "";
+            searchByCourseName += "";
+
+            if (page == -1)
+            {
+                page = 0;
+            }
+
+            var user = await _unitOfWork.Users.GetByEmail(email);
+
+            if (user == null)
+            {
+                return new Result()
+                {
+                    Message = "User doesn't exist",
+                    Status = false
+                };
+            }
+
+            if (user.Role.ToLower() != "student")
+            {
+                return new Result()
+                {
+                    Message = "User doesn't have Student Role",
+                    Status = false
+                };
+            }
+
+            var expDto = await _context.StudentCourse_ExpCourses
+                .Where(x => x.Student_Course.UserId == user.Id && x.IsCompleted)
+                .Select(x => new ExpDto()
+                {
+                    Idd = x.Exp_Course.Experiment.Idd,
+                    Name = x.Exp_Course.Experiment.Name,
+                    CourseName = x.Exp_Course.Course.Name,
+                    SubmitedAt = x.ReservedDay.ToShortDateString(),
+                    Status = x.Status,
+                    Grade = x.FinalGrade,
+                    FeedBack = x.feedback
+                })
+                .Where(x => x.Name.ToLower().Contains("" + searchByName.ToLower()) && x.CourseName.ToLower().Contains("" + searchByCourseName.ToLower()))
+                .ToListAsync();
+
+            var count = expDto.Count;
+
+            return new Result()
+            {
+                Data = new
+                {
+                    result = expDto.Skip(page * 10).Take(10).ToList(),
+                    count,
+                    next = (page * 10) + 10 >= count ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Student/Completed?page={page + 1 + 1}",
+                    previous = page == 0 ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Student/Completed?page={page - 1 + 1}"
+                },
+                Status = true
+            };
+        }
+
+        public async Task<Result> GetStudentCourses(string email, int page, string searchByName, string searchByCode)
+        {
+            searchByName += "";
+            searchByCode += "";
+
             if (page == -1)
             {
                 page = 0;
@@ -152,100 +417,8 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var user_Courses = await _context.User_Courses.Where(n => n.UserId == user.Id)
-                              .ToListAsync();
-
-            var Exp_Courses = new List<Exp_Course>();
-
-            foreach (var user_course in user_Courses)
-            {
-                var temp = await _context.StudentCourse_ExpCourses.Where(x => x.IsCompleted && x.Student_CourseId == user_course.Id)
-                                .Select(x => x.Exp_Course).ToListAsync();
-                Exp_Courses.AddRange(temp);
-            }
-
-            try { if (!Exp_Courses.Any())
-                    {
-                        return new Result()
-                        {
-                            Message = "There is no completed experiment",
-                            Status = false
-                        };
-                    }
-            }
-            catch (ArgumentNullException)
-            {
-                return new Result()
-                {
-                    Message = "There is no completed experiment ex",
-                    Status = false
-                };
-            }
-
-            var Exp_CoursesPaged = Exp_Courses.Skip(page * 10).Take(10).ToList();
-            var count = Exp_Courses.Count;
-
-            var expsDto = new List<ExpDto>();
-            foreach (var exp_course in Exp_CoursesPaged)
-            {
-                var exp = await _context.Expirments.FirstOrDefaultAsync(x => x.Id == exp_course.ExperimentId);
-                var course = await _context.Courses.FirstOrDefaultAsync(x => x.Id == exp_course.CourseId);
-                var expDto = new ExpDto()
-                {
-                    Name = exp.Name,
-                    Description = exp.Description,
-                    AuthorName = exp.AuthorName,
-                    CourseName = course.Name,
-                    CourseIdd = course.Idd,
-                    StartDate = exp_course.StartDate,
-                    EndDate = exp_course.EndDate
-                };
-
-                expsDto.Add(expDto);
-            }
-
-
-            return new Result()
-            {
-                Data = new
-                {
-                    result = expsDto,
-                    count,
-                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Student/Completed-Experiments?page={page + 1 + 1}",
-                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Student/Completed-Experiments?page={page - 1 + 1}"
-                },
-                Status = true
-            };
-
-        }
-
-        public async Task<Result> GetStudentCourses(string email, int page)
-        {
-            if(page == -1)
-            {
-                page = 0;
-            }
-
-            var user = await _unitOfWork.Users.GetByEmail(email);
-            if (user == null)
-            {
-                return new Result()
-                {
-                    Message = "User doesn't exist",
-                    Status = false
-                };
-            }
-
-            if (user.Role.ToLower() != "student")
-            {
-                return new Result()
-                {
-                    Message = "User doesn't have Student Role",
-                    Status = false
-                };
-            }
-
-            var courses = _context.User_Courses.Where(x => x.UserId == user.Id && x.Role == "student").Select(x=>x.Course).ToList();
+            var courses = _context.User_Courses.Where(x => x.UserId == user.Id && x.Role == "student").Select(x=>x.Course)
+                .Where(x => x.Name.ToLower().Contains("" + searchByName.ToLower()) && x.Code.ToLower().Contains("" + searchByCode.ToLower())).ToList();
             if(!courses.Any())
             {
                 return new Result()
@@ -339,95 +512,8 @@ namespace LLS.BLL.Services
 
         //}
 
-        public async Task<Result> SubmitExp(StudentSubmit submit, string studentId)
-        {
-            var user = _context.Users.FirstOrDefault(x => x.IdentityId == Guid.Parse(studentId));
-            if (user == null)
-            {
-                return new Result()
-                {
-                    Message = "User doesn't exist",
-                    Status = false
-                };
-            }
 
-            if (user.Role.ToLower() != "student")
-            {
-                return new Result()
-                {
-                    Message = "User doesn't have Student Role",
-                    Status = false
-                };
-            }
-
-            var course = await _unitOfWork.Courses.GetByIdd(submit.courseIdd);
-            if (course == null)
-                return new Result()
-                {
-                    Message = "there is no course with this IDD",
-                    Status = false
-                };
-
-            var exp = await _unitOfWork.Experiments.GetByIdd(submit.expIdd);
-            if (exp == null)
-                return new Result()
-                {
-                    Message = "there is no Experiment with this IDD",
-                    Status = false
-                };
-
-            var expCourse = await _context.Exp_Courses
-                .FirstOrDefaultAsync(x => x.ExperimentId == exp.Id && x.CourseId == course.Id);
-
-            var studentCourse = await _context.User_Courses
-                .FirstOrDefaultAsync(x => x.UserId == user.Id && x.CourseId == course.Id);
-
-            var studentCourse_expCourse = await _context.StudentCourse_ExpCourses
-                .FirstOrDefaultAsync(x => x.Exp_CourseId == expCourse.Id && x.Student_CourseId == studentCourse.Id);
-
-            if(studentCourse_expCourse.NumberOfTials == expCourse.NumbersOfTrials)
-            {
-                return new Result()
-                {
-                    Message = "There is no trials left for this Exp",
-                    Status = false
-                };
-            }
-
-            
-
-            var studentTrial = new Student_Trial()
-            {
-                TotalTimeInMin = submit.TotalTimeInMin,
-                LLA = JsonConvert.SerializeObject(submit.lla, Formatting.None,
-                                        new JsonSerializerSettings
-                                        {
-                                            NullValueHandling = NullValueHandling.Ignore
-                                        }),
-                StudentCourse_ExpCourse = studentCourse_expCourse,
-                StudentCourse_ExpCourseId = studentCourse_expCourse.Id,
-                IsGraded = false,
-                SubmitedAt = DateTime.Now
-            };
-
-            studentCourse_expCourse.IsCompleted = true;
-
-            studentCourse_expCourse.NumberOfTials++;
-
-            //AutoGrade(studentSubmint, exp, stu_expCourse.NumberOfTials);
-            var res = await _context.Trials.AddAsync(studentTrial);
-
-            await _unitOfWork.SaveAsync();
-
-            return new Result()
-            {
-                Message = "Submited Successfully",
-                Status = true
-            };
-        }
-
-
-        public async Task<Result> startTrial(Guid courseIdd, Guid expIdd, string studentId)
+        public async Task<Result> startTrial(Guid expIdd, string studentId)
         {
             var user =  _context.Users.FirstOrDefault(x=>x.IdentityId == Guid.Parse(studentId));
             if (user == null)
@@ -448,14 +534,6 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var course = await _unitOfWork.Courses.GetByIdd(courseIdd);
-            if (course == null)
-                return new Result()
-                {
-                    Message = "there is no course with this IDD",
-                    Status = false
-                };
-
             var exp = await _unitOfWork.Experiments.GetByIdd(expIdd);
             if (exp == null)
                 return new Result()
@@ -464,8 +542,16 @@ namespace LLS.BLL.Services
                     Status = false
                 };
 
+            var courseId = _context.Exp_Courses.FirstOrDefault(x=>x.ExperimentId == exp.Id).CourseId;
+            if (courseId == null)
+                return new Result()
+                {
+                    Message = "there is no course with this IDD",
+                    Status = false
+                };
+
             var expCourse = await _context.Exp_Courses
-                .FirstOrDefaultAsync(x => x.ExperimentId == exp.Id && x.CourseId == course.Id);
+                .FirstOrDefaultAsync(x => x.ExperimentId == exp.Id && x.CourseId == courseId);
 
             if (expCourse == null)
                 return new Result()
@@ -475,7 +561,7 @@ namespace LLS.BLL.Services
                 };
 
             var studentCourse = await _context.User_Courses
-                .FirstOrDefaultAsync(x => x.UserId == user.Id && x.CourseId == course.Id);
+                .FirstOrDefaultAsync(x => x.UserId == user.Id && x.CourseId == courseId);
 
             if (studentCourse == null)
                 return new Result()
@@ -494,6 +580,15 @@ namespace LLS.BLL.Services
                     Status = false,
                 };
 
+            //if(!(studentCourse_expCourse.StartFrom <= DateTime.Now.AddHours(2) && studentCourse_expCourse.EndAt >= DateTime.Now.AddHours(2))) 
+            //{
+            //    return new Result()
+            //    {
+            //        Message = "Experiment is not available",
+            //        Status = false,
+            //    };
+            //}
+
             var studentTrial = new Student_Trial()
             {
                 StartedAt= DateTime.Now,
@@ -503,6 +598,12 @@ namespace LLS.BLL.Services
                 IsGraded = false,
             };
 
+            if (expCourse.NumbersOfTrials == studentCourse_expCourse.NumberOfTials)
+            {
+                studentCourse_expCourse.IsCompleted = true;
+                studentCourse_expCourse.Status = "Completed";
+                await _context.SaveChangesAsync();
+            }
 
             studentCourse_expCourse.NumberOfTials++;
 
@@ -518,7 +619,9 @@ namespace LLS.BLL.Services
 
             var res = await _context.Trials.AddAsync(studentTrial);
 
-            await _unitOfWork.SaveAsync();
+            exp.Editable = false;
+
+            await _context.SaveChangesAsync();
 
             return new Result()
             {
@@ -584,6 +687,7 @@ namespace LLS.BLL.Services
             if (expCourse.NumbersOfTrials == studentCourse_expCourse.NumberOfTials)
             {
                 studentCourse_expCourse.IsCompleted = true;
+                studentCourse_expCourse.Status = "Completed";
             }
 
             await _unitOfWork.SaveAsync();

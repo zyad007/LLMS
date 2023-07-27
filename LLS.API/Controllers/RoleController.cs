@@ -84,7 +84,7 @@ namespace LLS.API.Controllers
         //        perms = result.Select(x => x.Value).ToList();
         //    }
 
-            
+
 
         //    return Ok(new Result()
         //    {
@@ -93,7 +93,8 @@ namespace LLS.API.Controllers
         //    });
         //}
 
-
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Role")]
         [HttpPost]
         public async Task<IActionResult> AddRole(Role role)
         {
@@ -112,10 +113,18 @@ namespace LLS.API.Controllers
             return Ok(new Result()
             {
                 Status = true,
-                Message = "Role Added Successfully"
+                Message = "Role Added Successfully",
+                Data = new
+                {
+                    Id = roleDb.Id,
+                    Name = role.Name,
+                    Premission = role.Permissions
+                }
             });
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Role")]
         [HttpPut("{idd}")]
         public async Task<IActionResult> UpdateRole(Guid idd, Role roleUpdate)
         {
@@ -182,9 +191,16 @@ namespace LLS.API.Controllers
             return Ok(new Result()
             {
                 Message = "Updated Successfully",
-                Status = true
+                Status = true,
+                Data = new
+                {
+                    Id = role.Id,
+                    Name = roleUpdate.Name,
+                    Permission = roleUpdate.Permissions
+                }
             });
         }
+
 
         [HttpGet("{idd}")]
         public async Task<IActionResult> GetAllClaimsForRole(Guid idd)
@@ -218,38 +234,59 @@ namespace LLS.API.Controllers
             });
         }
 
+
         [HttpGet("All-Permissions")]
         public IActionResult GetAllPerms()
         {
             return Ok(new Result()
             {
                 Data = new List<string>() {
-                                  "AddDeleteEdit_User",
-                                  "AddDeleteEdit_Course",
-                                  "AddDeleteEdit_Exp",
-                                  "AddDeleteEdit_Role",
-                                  "AssignExpToCourse",
-                                  "AssignUserToCourse",
-                                  "RemoveExpFromCourse",
-                                  "RemoveUserFromCourse",
-                                  "AssignRoleToUser",
-                                  "GetAssignedExp_Student",
-                                  "SubmitAssignedExp_Student",
-                                  "GetAssignedCourse_Student",
-                                  "GetAssignedCourse_Teacher",
-                                  "ResetUserPassword"   
+                                    "AddDeleteEdit_User",
+                                    "AddDeleteEdit_Course",
+                                    "AddDeleteEdit_Exp",
+                                    "AddDeleteEdit_Role",
+
+                                    "ViewCourses",
+                                    "ViewRoles",
+                                    "ViewExp",
+                                    "ViewUsers",
+
+                                    "AssignExpToCourse",
+                                    "AssignUserToCourse",
+                                    "AssignRoleToUser",
+
+                                    "SubmitAssignedExp_Student",
+                                    "ViewAssignedExpCourse_Student",
+
+                                    "GradeStudentAnswers_Teacher",
+                                    "ViewAnalytics_Teacher",
+                                    "ViewGradeBooks_Teacher",
+                                    "ViewActiveLab_Teacher",
+                                    
                 },
                 Status = true
             });
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> GetAllRoles()
+        public async Task<IActionResult> GetAllRoles(int page, string searchByName)
+        {
+            searchByName += "";
+            var result = await _unitOfWork.Roles.GetAllUsers(page-1, searchByName);
+            return CheckResult(result);
+        }
+
+
+        [HttpGet("All")]
+        public async Task<IActionResult> GetAllRolesAll()
         {
             var result = await _unitOfWork.Roles.GetAllUsers();
             return CheckResult(result);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AssignRoleToUser")]
         [HttpPost("{idd}/{userIdd}")]
         public async Task<IActionResult> AddUserToRole(Guid idd, Guid userIdd)
         {
@@ -260,6 +297,9 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AssignRoleToUser")]
         [HttpDelete("{idd}/{userIdd}")]
         public async Task<IActionResult> RemoveRoleFromUser(Guid idd, Guid userIdd)
         {
@@ -270,6 +310,8 @@ namespace LLS.API.Controllers
             return CheckResult(result);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Policy = "AddDeleteEdit_Role")]
         [HttpDelete("{idd}")]
         public async Task<IActionResult> DeleteRole(Guid idd)
         {

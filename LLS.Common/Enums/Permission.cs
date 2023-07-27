@@ -16,13 +16,27 @@ namespace LLS.Common.Enums
         AddDeleteEdit_Role,
         AssignExpToCourse,
         AssignUserToCourse,
-        RemoveExpFromCourse,
-        RemoveUserFromCourse,
+        //RemoveExpFromCourse,
+        //RemoveUserFromCourse,
         AssignRoleToUser,
-        GetAssignedExp_Student,
+        //GetAssignedExp_Student,
         SubmitAssignedExp_Student,
-        GetAssignedCourse_Student,
-        GetAssignedCourse_Teacher,
-        ResetUserPassword 
+        GradeStudentAnswers_Teacher,
+        //GetAssignedCourse_Student,
+        //GetAssignedCourse_Teacher,
+        //ResetUserPassword 
+
+        //Views
+        ViewUsers,
+        ViewExp,
+        ViewRoles,
+        ViewCourses,
+
+        ViewActiveLab_Teacher,
+        ViewGradeBooks_Teacher,
+        ViewAnalytics_Teacher,
+
+        ViewAssignedExpCourse_Student
+
     }
 }

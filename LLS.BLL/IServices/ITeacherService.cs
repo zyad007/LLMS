@@ -10,12 +10,12 @@ namespace LLS.BLL.IServices
 {
     public interface ITeacherService
     {
-        Task<Result> getExps(Guid teacherId, Guid courseIdd, int page);
-        Task<Result> GetGradeBookForExp(Guid userId, Guid courseIdd, Guid expIdd, int page);
-        Task<Result> GetCourses(Guid userIdd, int page, bool isTeacher);
+        Task<Result> getExps(Guid teacherId, Guid courseIdd, int page, string search);
+        Task<Result> GetGradeBookForExp(Guid userId, Guid courseIdd, Guid expIdd, int page, string search);
+        Task<Result> GetCourses(Guid userIdd, int page, bool isTeacher, string searchByName, string searchByCode);
         Task<Result> getStudentTrials(Guid teacherId, Guid studentCourseExpId,Guid expIdd, Guid courseIdd, int page);
         Task<Result> getStudentLRO(Guid teacherId, Guid expIdd, Guid trialId);
-        Task<Result> GradeStudentTrial(Guid teacherId, Guid trialId, LLO lro);
+        Task<Result> GradeStudentTrial(Guid teacherId, Guid trialId, LLO lro, string feedback);
 
     }
 }

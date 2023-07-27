@@ -18,5 +18,8 @@ namespace LLS.Common.Dto
         public string AcademicYear { get; set; }
         public string City { get; set; }
         public string Gender { get; set; }
+        public string imgURL { get; set; }
+        public DateTime Update { get; set; }
+        public DateTime LastLogIn { get; set; }
     }
 }

@@ -88,16 +88,21 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> GetAllCourses(int page)
+        public async Task<Result> GetAllCourses(int page, string searchByName, string searchByCode)
         {
             //var courses = await _unitOfWork.Courses.GetAll();
+
+            searchByCode += "";
+            searchByName += "";
 
             if(page == -1 )
             {
                 page = 0;
             }
 
-            var courses = _context.Courses.Skip(page*10).Take(10).ToList();
+            var courses = _context.Courses
+                .Where(x => x.Name.ToLower().Contains("" + searchByName.ToLower()) && x.Code.ToLower().Contains("" + searchByCode.ToLower()))
+                .Skip(page*10).Take(10).ToList();
 
             var count = _context.Courses.Count();
 
@@ -115,8 +120,8 @@ namespace LLS.BLL.Services
                 {
                     result = CourseListDto,
                     count,
-                    next = (page*10)+10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course?page={page+1+1}",
-                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course?page={page-1+1}"
+                    next = (page*10)+10 >= count ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Course?page={page+1+1}",
+                    previous = page == 0 ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Course?page={page-1+1}"
                 }
             };
         }
@@ -208,7 +213,8 @@ namespace LLS.BLL.Services
                 User = user,
                 CourseId = course.Id,
                 Course = course,
-                Role = role
+                Role = role,
+                Update = DateTime.Now
             };
 
             var result = await _context.User_Courses.AddAsync(user_course);
@@ -252,8 +258,10 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> GetUsersAssignedToCourse(Guid idd, string role, int page)
+        public async Task<Result> GetUsersAssignedToCourse(Guid idd, string role, int page, string search)
         {
+            search += "";
+
             if (page == -1)
             {
                 page = 0;
@@ -269,12 +277,21 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var userListDto = await _context.User_Courses
+            var userListDto = _context.User_Courses
                         .Where(x => x.CourseId == course.Id && x.Role == role.ToLower())
-                        .Select(x => _iMapper.Map<UserDto>(x.User)).ToListAsync();
+                        .Select(x => new UserDto()
+                        {
+                            Update = x.Update,
+                            Email = x.User.Email,
+                            Role = x.User.Role,
+                            FirstName = x.User.FirstName,
+                            Lastname = x.User.Lastname,
+                            Idd = x.User.Idd
+                        }
+                        ).ToList();
 
 
-            var users = userListDto.Skip(page*10).Take(10).ToList();
+            var users = userListDto.Where(x => x.Email.ToLower().Contains("" + search.ToLower())).Skip(page*10).Take(10).ToList();
             int count = userListDto.Count;
 
             return new Result()
@@ -284,8 +301,8 @@ namespace LLS.BLL.Services
                 {
                     result = users,
                     count,
-                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course/{idd}/{role}?page={page + 1+1}",
-                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course/{idd}/{role}?page={page - 1+1}"
+                    next = (page * 10) + 10 >= count ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Course/{idd}/{role}?page={page + 1+1}",
+                    previous = page == 0 ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Course/{idd}/{role}?page={page - 1+1}"
                 }
             };
         }
@@ -302,7 +319,7 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var exp = await _unitOfWork.Experiments.GetByIdd(expIdd);
+            var exp = await _context.Expirments.FirstOrDefaultAsync(x=>x.Idd == expIdd);
             if (exp == null)
                 return new Result()
                 {
@@ -312,15 +329,25 @@ namespace LLS.BLL.Services
 
 
             //Allow add same exp with copy or only allow 1 exp with no Origin
-            var expCopy = exp;
+            var expCopy = new Experiment();
             expCopy.Id = Guid.NewGuid();
             expCopy.Idd = Guid.NewGuid();
             expCopy.AddedDate = DateTime.Now;
             expCopy.UpdateDate = DateTime.Now;
             expCopy.Active = false;
+
+            expCopy.Name = exp.Name;
+            expCopy.Description = exp.Description;
+            expCopy.AuthorName = exp.AuthorName;
+            expCopy.AuthorId = exp.AuthorId;
+            expCopy.LLO = exp.LLO;
+            expCopy.Editable = true;
+            expCopy.hasLLO = exp.hasLLO;
             
 
             await _unitOfWork.Experiments.Create(expCopy);
+
+            exp.RelatedCourse = course.Name;
 
             var exp_ress = await _context.Resource_Exps.Where(x => x.ExperimentId == exp.Id).ToListAsync();
             foreach(var exp_resTemp in exp_ress)
@@ -405,8 +432,10 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> GetExpAssignedToCourse(Guid idd, int page)
+        public async Task<Result> GetExpAssignedToCourse(Guid idd, int page, string search)
         {
+            search += "";
+
             if (page == -1)
             {
                 page = 0;
@@ -422,7 +451,7 @@ namespace LLS.BLL.Services
                 };
             }
 
-            var expListDto = await _context.Exp_Courses
+            var expListDto = _context.Exp_Courses
                     .Where(x => x.CourseId == course.Id)
                     .Select(x => new ExpDto()
                     {
@@ -436,11 +465,10 @@ namespace LLS.BLL.Services
                         CourseIdd = course.Idd,
                         CourseName = course.Name
                     })
-                    .ToListAsync();
+                    .ToList();
 
-            var exps = expListDto.Skip(page * 10).Take(10).ToList();
+            var exps = expListDto.Where(x => x.Name.ToLower().Contains("" + search.ToLower())).Skip(page * 10).Take(10).ToList();
             int count = expListDto.Count;
-
 
             return new Result()
             {
@@ -449,8 +477,8 @@ namespace LLS.BLL.Services
                 {
                     result = exps,
                     count,
-                    next = (page * 10) + 10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course/{idd}/Assign-Experiment?page={page + 1+1}",
-                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Course/{idd}/Assign-Experiment?page={page - 1+1}"
+                    next = (page * 10) + 10 >= count ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Course/{idd}/Assign-Experiment?page={page + 1+1}",
+                    previous = page == 0 ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Course/{idd}/Assign-Experiment?page={page - 1+1}"
                 
                 }
             };

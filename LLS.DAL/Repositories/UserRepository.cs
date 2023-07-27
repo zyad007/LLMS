@@ -40,6 +40,7 @@ namespace LLS.DAL.Repositories
             res.City = user.City;
             res.Gender = user.Gender;
             res.Role = user.Role;
+            res.imgURL = user.imgURL;
 
             res.UpdateDate = DateTime.Now;
         }

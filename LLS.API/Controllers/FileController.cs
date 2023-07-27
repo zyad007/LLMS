@@ -26,7 +26,7 @@ namespace LLS.API.Controllers
 
             string host = HttpContext.Request.Host.Value;
 
-            if (objFile == null || objFile.Length > 3000000000)
+            if (objFile == null || objFile.Length > 50000000000)
             {
                 return BadRequest(new
                 {

@@ -1,4 +1,5 @@
-﻿using LLS.Common.Models;
+﻿using LLS.Common.Dto;
+using LLS.Common.Models;
 using LLS.Common.Transfere_Layer_Object;
 using LLS.DAL.Data;
 using LLS.DAL.Interfaces;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,15 +59,60 @@ namespace LLS.DAL.Repositories
             };
         }
 
+        public async Task<Result> GetAllUsers(int page, string search)
+        {
+            if(page == -1 )
+            {
+                page = 0;
+            }
+
+            var result = await _roleManager.Roles.Select(x=>new
+            {
+                x.Id,
+                x.Name
+            }).Where(x=>x.Name.Contains(""+search)).ToListAsync();
+
+            if (result.Any())
+            {
+                var resPaged = result.Skip(page*10).Take(10).ToList();
+                var count = result.Count();
+                return new Result()
+                {
+                    Status = true,
+                    Data = new
+                    {
+                        result = resPaged,
+                        count,
+                        next = (page * 10) + 10 >= count ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Role?page={page + 1 + 1}",
+                        previous = page == 0 ? null : $"https://optimistic-burnell.74-50-88-98.plesk.page/api/Role?page={page - 1 + 1}"
+                    }
+                };
+            }
+            return new Result()
+            {
+                Message = "There is no Roles",
+                Status = false
+            };
+        }
+
         public async Task<Result> GetAllUsers()
         {
-            var result = await _roleManager.Roles.ToListAsync();
+
+            var result = await _roleManager.Roles.Select(x => new
+            {
+                x.Id,
+                x.Name
+            }).ToListAsync();
+
+            var resultNames = result.Select(x=>x.Name).ToList();
+            resultNames.Add("none");
+
             if (result.Any())
             {
                 return new Result()
                 {
-                    Data = result,
-                    Status = true
+                    Status = true,
+                    Data = resultNames
                 };
             }
             return new Result()

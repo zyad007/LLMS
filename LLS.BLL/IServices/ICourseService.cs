@@ -12,16 +12,16 @@ namespace LLS.BLL.IServices
     {
         Task<Result> CreateCourse(CourseDto courseDto);
         Task<Result> DeleteCourse(Guid idd);
-        Task<Result> GetAllCourses(int page);
+        Task<Result> GetAllCourses(int page, string searchByName, string searchByCode);
         Task<Result> GetCourse(Guid idd);
         Task<Result> UpdateCourse(CourseDto courseDto);
 
         Task<Result> AssignUserToCourse(Guid userIdd, Guid idd, string role);
-        Task<Result> GetUsersAssignedToCourse(Guid idd, string role, int page);
+        Task<Result> GetUsersAssignedToCourse(Guid idd, string role, int page, string search);
 
 
         Task<Result> AssignExpToCourse(Guid expIdd, Guid courseIdd, DateTime startDate, DateTime endDate, int trials);
-        Task<Result> GetExpAssignedToCourse(Guid idd, int page);
+        Task<Result> GetExpAssignedToCourse(Guid idd, int page, string search);
 
 
     }

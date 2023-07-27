@@ -56,11 +56,23 @@ namespace LLS.BLL.Services
                 Idd = expDto.Idd,
                 AuthorId = userId,
                 AuthorName = expDto.AuthorName,
-                hasLLO = false
+                hasLLO = false,
+                Editable = true
             };
 
             var result = await _unitOfWork.Experiments.Create(exp);
             await _unitOfWork.SaveAsync();
+            
+            var expDb = await _context.Expirments.FirstOrDefaultAsync(x=>x.Idd == exp.Idd);
+
+            if (expDb == null)
+            {
+                return new Result()
+                {
+                    Status = false,
+                    Message = "Something went wrong"
+                };
+            }
 
             if (result == false)
             {
@@ -75,7 +87,7 @@ namespace LLS.BLL.Services
             {
                 Status = true,
                 Message = "Added Successfully",
-                Data = exp.Idd
+                Data = _iMapper.Map<ExpDto>(expDb)
             };
         }
 
@@ -101,8 +113,9 @@ namespace LLS.BLL.Services
             };
         }
 
-        public async Task<Result> GetAllExp(int page)
+        public async Task<Result> GetAllExp(int page, string searchByName, string searchByRelatedCourse, string host)
         {
+
             if (page == -1)
             {
                 page = 0;
@@ -110,13 +123,18 @@ namespace LLS.BLL.Services
 
             //var exps = await _unitOfWork.Experiments.GetAllExps();
 
-            int count = _context.Expirments.Count();
+            var exps = _context.Expirments.Where(x=>x.Active == true).ToList();
 
-            var exps = _context.Expirments.Skip(page*10).Take(10).ToList();
+            //var searchExp = exps.Where(x => x.Name.Contains("" + searchByName)).ToList();
+            var searchExp = exps.Where(x=>((x.Name + "").ToLower() + "").Contains(("" + searchByName).ToLower())).ToList();
+
+            var count = searchExp.Count;
+
+            var pagedExp = searchExp.Skip(page * 10).Take(10).ToList();
 
             var expsDto = new List<ExpDto>();
 
-            foreach (var exp in exps)
+            foreach (var exp in pagedExp)
             {
                 var expDto = _iMapper.Map<ExpDto>(exp);
                 //if (exp.LLO != null)
@@ -127,7 +145,6 @@ namespace LLS.BLL.Services
                 expsDto.Add(expDto);
             }
 
-
             return new Result()
             {
                 Status = true,
@@ -135,8 +152,8 @@ namespace LLS.BLL.Services
                 {
                     result = expsDto,
                     count,
-                    next = (page*10)+10 >= count ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Experiment?page={page+1+1}",
-                    previous = page == 0 ? null : $"https://stupefied-antonelli.74-50-88-98.plesk.page/api/Experiment?page={page-1+1}"
+                    next = (page*10)+10 >= count ? null : $"https://{host}/api/Experiment?page={page+1+1}",
+                    previous = page == 0 ? null : $"https://{host}/api/Experiment?page={page-1+1}"
                 }
             };
         }
@@ -243,7 +260,7 @@ namespace LLS.BLL.Services
 
         public async Task<Result> CreateLLO(Guid expIdd,LLO llo, string userId)
         {
-            var exp = await _unitOfWork.Experiments.GetByIdd(expIdd);
+            var exp = await _context.Expirments.FirstOrDefaultAsync(x=>x.Idd == expIdd);
             if (exp == null)
             {
                 return new Result()
@@ -271,12 +288,17 @@ namespace LLS.BLL.Services
                 };
             }
 
-            FetchDtoIntoLLO(exp, llo);
+            //FetchDtoIntoLLO(exp, llo);
+
+            exp.LLO = JsonConvert.SerializeObject(llo, Formatting.None,
+                                        new JsonSerializerSettings
+                                        {
+                                            NullValueHandling = NullValueHandling.Ignore
+                                        });
 
             exp.hasLLO = true;
 
-            await _unitOfWork.Experiments.Update(exp);
-            await _unitOfWork.SaveAsync();
+            await _context.SaveChangesAsync();
 
             return new Result()
             {

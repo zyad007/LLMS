@@ -16,6 +16,6 @@ namespace LLS.Common.Models.LLO.Pages.Blocks.Config
         public bool? ShowCorrectAnswer { get; set; }
         public bool? ShowCountdown { get; set; }
         public bool? TimeState { get; set; }
-
+        public string help { get; set; }
     }
 }

@@ -17,7 +17,7 @@ namespace LLS.BLL.IServices
         Task<Result> UpdateExp(ExpDto expDto, Guid userId);
         Task<Result> DeleteExp(Guid idd);
         Task<Result> GetExpByIdd(Guid idd);
-        Task<Result> GetAllExp(int page);
+        Task<Result> GetAllExp(int page, string searchByName, string searchByRelatedCourse, string host);
         Task<Result> AddRecources(List<Guid> resIdds, Guid idd);
         Task<Result> RemoveRecource(Guid idd, Guid resIdd);
         Task<Result> GetResource(Guid idd);

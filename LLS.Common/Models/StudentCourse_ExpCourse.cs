@@ -23,10 +23,21 @@ namespace LLS.Common.Models
         [ForeignKey(nameof(Exp_CourseId))]
         public Exp_Course Exp_Course { get; set; }
 
-        
+
+        public DateTime ReservedDay { get; set; }
+        public int TimeSlot { get; set; }
+        public string Status { get; set; } = "Assigned"; // Assigned Reserved Graded
+
+        public DateTime StartFrom { get; set; }
+        public DateTime EndAt { get; set; }
+
+
+
         public List<Student_Trial> Trials { get; set; }
         public int NumberOfTials { get; set; }
         public bool IsCompleted { get; set; }
+        public float FinalGrade { get; set; }
+        public string feedback { get; set; }
 
     }
 }

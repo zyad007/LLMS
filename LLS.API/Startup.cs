@@ -42,6 +42,7 @@ namespace LLS.API
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             services.Configure<VrlRoot>(Configuration.GetSection("vrlRoot"));
 
+            
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
@@ -112,30 +113,58 @@ namespace LLS.API
                 options.AddPolicy("AssignUserToCourse",
                     policy => policy.RequireClaim("AssignUserToCourse"));
 
-                // To Do
-                options.AddPolicy("RemoveExpFromCourse",
-                    policy => policy.RequireClaim("RemoveExpFromCourse"));
-                // To Do
-                options.AddPolicy("RemoveUserFromCourse",
-                    policy => policy.RequireClaim("RemoveUserFromCourse"));
+                //// To Do
+                //options.AddPolicy("RemoveExpFromCourse",
+                //    policy => policy.RequireClaim("RemoveExpFromCourse"));
+                //// To Do
+                //options.AddPolicy("RemoveUserFromCourse",
+                //    policy => policy.RequireClaim("RemoveUserFromCourse"));
 
                 options.AddPolicy("AssignRoleToUser",
                     policy => policy.RequireClaim("AssignRoleToUser"));
 
-                options.AddPolicy("GetAssignedExp_Student",
-                    policy => policy.RequireClaim("GetAssignedExp_Student"));
 
                 options.AddPolicy("SubmitAssignedExp_Student",
                     policy => policy.RequireClaim("SubmitAssignedExp_Student"));
 
-                options.AddPolicy("GetAssignedCourse_Student",
-                    policy => policy.RequireClaim("GetAssignedCourse_Student"));
+                options.AddPolicy("GradeStudentAnswers_Teacher",
+                    policy => policy.RequireClaim("GradeStudentAnswers_Teacher"));
 
-                options.AddPolicy("GetAssignedCourse_Teacher",
-                    policy => policy.RequireClaim("GetAssignedCourse_Teacher"));
-                //To do
-                options.AddPolicy("ResetUserPassword",
-                    policy => policy.RequireClaim("ResetUserPassword"));
+
+                options.AddPolicy("ViewAssignedExpCourse_Student",
+                    policy => policy.RequireClaim("ViewAssignedExpCourse_Student"));
+
+                options.AddPolicy("ViewAnalytics_Teacher",
+                    policy => policy.RequireClaim("ViewAnalytics_Teacher"));
+
+                options.AddPolicy("ViewGradeBooks_Teacher",
+                    policy => policy.RequireClaim("ViewGradeBooks_Teacher"));
+
+                options.AddPolicy("ViewActiveLab_Teacher",
+                    policy => policy.RequireClaim("ViewActiveLab_Teacher"));
+
+                options.AddPolicy("ViewCourses",
+                    policy => policy.RequireClaim("ViewCourses"));
+
+                options.AddPolicy("ViewRoles",
+                    policy => policy.RequireClaim("ViewRoles"));
+
+                options.AddPolicy("ViewExp",
+                    policy => policy.RequireClaim("ViewExp"));
+
+                options.AddPolicy("ViewUsers",
+                    policy => policy.RequireClaim("ViewUsers"));
+
+
+
+                //options.AddPolicy("GetAssignedCourse_Student",
+                //    policy => policy.RequireClaim("GetAssignedCourse_Student"));
+
+                //options.AddPolicy("GetAssignedCourse_Teacher",
+                //    policy => policy.RequireClaim("GetAssignedCourse_Teacher"));
+                ////To do
+                //options.AddPolicy("ResetUserPassword",
+                //    policy => policy.RequireClaim("ResetUserPassword"));
             });
 
             services.AddIdentity<IdentityUser, IdentityRole>(options
@@ -160,7 +189,9 @@ namespace LLS.API
         
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mgo+DSMBMAY9C3t2V1hhQlJAfVddXGFWfFN0RnNcdVp4flFFcDwsT3RfQF5jTn9Qd0JmX39ec3VRQA==");
+
+
             app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LLS.API v1"));

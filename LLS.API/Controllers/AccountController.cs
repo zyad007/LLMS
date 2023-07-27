@@ -128,6 +128,8 @@ namespace LLS.API.Controllers
                     authResult.RefreshToken,
                     authResult.Email,
                     authResult.Role,
+                    authResult.Name,
+                    authResult.imageUrl,
                     authResult.Idd,
                     authResult.Permissions
                 },

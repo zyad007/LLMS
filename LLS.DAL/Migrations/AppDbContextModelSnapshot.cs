@@ -129,6 +129,9 @@ namespace LLS.DAL.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
+                    b.Property<string>("RelatedCourse")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("timestamp without time zone");
 
@@ -254,8 +257,14 @@ namespace LLS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("EndAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<Guid>("Exp_CourseId")
                         .HasColumnType("uuid");
+
+                    b.Property<float>("FinalGrade")
+                        .HasColumnType("real");
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("boolean");
@@ -263,8 +272,23 @@ namespace LLS.DAL.Migrations
                     b.Property<int>("NumberOfTials")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("ReservedDay")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("StartFrom")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("Student_CourseId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("TimeSlot")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("feedback")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -380,6 +404,9 @@ namespace LLS.DAL.Migrations
                     b.Property<Guid>("IdentityId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("LastLogIn")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<string>("Lastname")
                         .HasColumnType("text");
 
@@ -391,6 +418,9 @@ namespace LLS.DAL.Migrations
 
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("imgURL")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -408,6 +438,9 @@ namespace LLS.DAL.Migrations
 
                     b.Property<string>("Role")
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("Update")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
