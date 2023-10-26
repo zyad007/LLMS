@@ -258,6 +258,11 @@ namespace LLS.API.Controllers
 
             PdfGraphics graphics = page.Graphics;
 
+            FileStream imageStream = new FileStream("Logo/2.jpeg", FileMode.Open, FileAccess.Read);
+            PdfBitmap image = new PdfBitmap(imageStream);
+            //Draw the image
+            graphics.DrawImage(image, 400, 0);
+
             //Set the standard font.
             PdfFont font = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
             PdfFont fontBold = new PdfStandardFont(PdfFontFamily.Helvetica, 12, PdfFontStyle.Bold);
@@ -297,7 +302,7 @@ namespace LLS.API.Controllers
             //Assign data source.
             pdfGrid.DataSource = dataTable;
             //Draw grid to the page of PDF document.
-            pdfGridLayoutResult = pdfGrid.Draw(page, new Syncfusion.Drawing.PointF(0, 80));
+            pdfGridLayoutResult = pdfGrid.Draw(page, new Syncfusion.Drawing.PointF(0, 140));
             //pdfGrid.Draw(page, new Syncfusion.Drawing.PointF(0, pdfGridLayoutResult.Bounds.Bottom + 20));
             
 
@@ -419,6 +424,11 @@ namespace LLS.API.Controllers
 
                 PdfGraphics graphics = page.Graphics;
 
+                FileStream imageStream = new FileStream("Logo/2.jpeg", FileMode.Open, FileAccess.Read);
+                PdfBitmap image = new PdfBitmap(imageStream);
+                //Draw the image
+                graphics.DrawImage(image, 400, 0);
+
                 //Set the standard font.
                 PdfFont font = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
                 PdfFont fontBold = new PdfStandardFont(PdfFontFamily.Helvetica, 12, PdfFontStyle.Bold);
@@ -438,42 +448,45 @@ namespace LLS.API.Controllers
                 PdfGridLayoutResult pdfGridLayoutResult;
                 List<object> data = new List<object>();
 
-                LLO lro = JsonConvert.DeserializeObject<LLO>(trial.LRO);
-                
-                foreach(var section in lro.Sections)
+                if(trial.LRO != null)
                 {
-                    foreach(var q in section.Column1)
+                    LLO lro = JsonConvert.DeserializeObject<LLO>(trial.LRO);
+
+                    foreach (var section in lro.Sections)
                     {
-                        Object row = new
+                        foreach (var q in section.Column1)
                         {
-                            Question_No = qNum,
-                            Degree = q.StudentScore
-                        };
-                        qNum++;
-                        sum += q.StudentScore;
-                        data.Add(row);
-                    }
-                    foreach (var q in section.Column2)
-                    {
-                        Object row2 = new
+                            Object row = new
+                            {
+                                Question_No = qNum,
+                                Degree = q.StudentScore
+                            };
+                            qNum++;
+                            sum += q.StudentScore;
+                            data.Add(row);
+                        }
+                        foreach (var q in section.Column2)
                         {
-                            Question_No = qNum,
-                            Degree = q.StudentScore
-                        };
-                        qNum++;
-                        sum += q.StudentScore;
-                        data.Add(row2);
-                    }
-                    foreach (var q in section.Column3)
-                    {
-                        Object row3 = new
+                            Object row2 = new
+                            {
+                                Question_No = qNum,
+                                Degree = q.StudentScore
+                            };
+                            qNum++;
+                            sum += q.StudentScore;
+                            data.Add(row2);
+                        }
+                        foreach (var q in section.Column3)
                         {
-                            Question_No = qNum,
-                            Degree = q.StudentScore
-                        };
-                        qNum++;
-                        sum += q.StudentScore;
-                        data.Add(row3);
+                            Object row3 = new
+                            {
+                                Question_No = qNum,
+                                Degree = q.StudentScore
+                            };
+                            qNum++;
+                            sum += q.StudentScore;
+                            data.Add(row3);
+                        }
                     }
                 }
 
@@ -489,7 +502,7 @@ namespace LLS.API.Controllers
                 //Assign data source.
                 pdfGrid.DataSource = dataTable;
                 //Draw grid to the page of PDF document.
-                pdfGridLayoutResult = pdfGrid.Draw(page, new Syncfusion.Drawing.PointF(0, 100));
+                pdfGridLayoutResult = pdfGrid.Draw(page, new Syncfusion.Drawing.PointF(0, 120));
                 //pdfGrid.Draw(page, new Syncfusion.Drawing.PointF(0, pdfGridLayoutResult.Bounds.Bottom + 20));
                 i++;
             }

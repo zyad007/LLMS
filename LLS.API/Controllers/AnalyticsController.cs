@@ -389,6 +389,11 @@ namespace LLS.API.Controllers
 
                 PdfGraphics graphics = page.Graphics;
 
+                FileStream imageStream = new FileStream("Logo/2.jpeg", FileMode.Open, FileAccess.Read);
+                PdfBitmap image = new PdfBitmap(imageStream);
+                //Draw the image
+                graphics.DrawImage(image, 400, 0);
+
                 //Set the standard font.
                 PdfFont font = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
                 PdfFont fontBold = new PdfStandardFont(PdfFontFamily.Helvetica, 12, PdfFontStyle.Bold);
@@ -435,7 +440,7 @@ namespace LLS.API.Controllers
                 //Assign data source.
                 pdfGrid.DataSource = dataTable;
                 //Draw grid to the page of PDF document.
-                pdfGridLayoutResult = pdfGrid.Draw(page, new Syncfusion.Drawing.PointF(0, 80));
+                pdfGridLayoutResult = pdfGrid.Draw(page, new Syncfusion.Drawing.PointF(0, 110));
                 //pdfGrid.Draw(page, new Syncfusion.Drawing.PointF(0, pdfGridLayoutResult.Bounds.Bottom + 20));
             }
 
